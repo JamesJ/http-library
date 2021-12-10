@@ -49,27 +49,7 @@ public class VertxHttpServer implements HttpServer {
     }
 
     private io.vertx.core.http.HttpMethod toVertxHttpMethod(HttpMethod method) {
-        switch (method) {
-            case GET:
-                return io.vertx.core.http.HttpMethod.GET;
-            case POST:
-                return io.vertx.core.http.HttpMethod.POST;
-            case DELETE:
-                return io.vertx.core.http.HttpMethod.DELETE;
-            case PUT:
-                return io.vertx.core.http.HttpMethod.PUT;
-            case OPTIONS:
-                return io.vertx.core.http.HttpMethod.OPTIONS;
-            case CONNECT:
-                return io.vertx.core.http.HttpMethod.CONNECT;
-            case PATCH:
-                return io.vertx.core.http.HttpMethod.PATCH;
-            case TRACE:
-                return io.vertx.core.http.HttpMethod.TRACE;
-            case HEAD:
-                return io.vertx.core.http.HttpMethod.HEAD;
-        }
-        return io.vertx.core.http.HttpMethod.GET;
+        return io.vertx.core.http.HttpMethod.valueOf(method.name());
     }
 
     protected void handleException(Logger logger, HttpRequest httpRequest, RoutingContext routingContext, Throwable throwable) {
