@@ -14,10 +14,11 @@
         <module>parameters</module>
         <module>routes</module>
         <module>audit</module>
-        <module>headers</module>
+        <module>me.jamesj.http.library.headers</module>
         <module>server</module>
         <module>server-impl-vertx</module>
         <module>util</module>
+        <module>request</module>
     </modules>
 
     <dependencies>

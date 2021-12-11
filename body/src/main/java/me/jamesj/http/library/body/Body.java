@@ -1,12 +1,12 @@
 package me.jamesj.http.library.body;
 
-import me.jamesj.http.library.parameters.Parameter;
+import me.jamesj.http.library.parameters.v2.Source;
 
 public interface Body {
-
-    <T> T get(Parameter<T> key);
-
+    
+    Source.Result get(String key);
+    
     int length();
-
-
+    
+    
 }

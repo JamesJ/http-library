@@ -3,18 +3,18 @@ package me.jamesj.http.server.impl.vertx;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.routes.HttpFilter;
-import me.jamesj.http.routes.requests.HttpRequest;
+import me.jamesj.http.routes.HttpRequest;
 
 public class VertxHttpFilter implements Handler<RoutingContext> {
-
+    
     private final VertxHttpServer httpServer;
     private final HttpFilter httpFilter;
-
+    
     public VertxHttpFilter(VertxHttpServer httpServer, HttpFilter httpFilter) {
         this.httpServer = httpServer;
         this.httpFilter = httpFilter;
     }
-
+    
     @Override
     public void handle(RoutingContext routingContext) {
         HttpRequest httpRequest = new VertxHttpRequest(routingContext);
