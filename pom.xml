@@ -12,9 +12,9 @@
         <module>core</module>
         <module>body</module>
         <module>parameters</module>
-        <module>routes</module>
+        <module>me.jamesj.http.library.server.routes</module>
         <module>audit</module>
-        <module>me.jamesj.http.library.headers</module>
+        <module>me.jamesj.http.library.server.headers</module>
         <module>server</module>
         <module>server-impl-vertx</module>
         <module>util</module>
