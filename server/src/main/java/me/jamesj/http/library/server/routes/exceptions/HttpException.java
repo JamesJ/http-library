@@ -3,7 +3,7 @@ package me.jamesj.http.library.server.routes.exceptions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.routes.response.JsonResponse;
+import me.jamesj.http.library.server.response.json.JsonResponse;
 
 public abstract class HttpException extends Exception implements JsonResponse {
     

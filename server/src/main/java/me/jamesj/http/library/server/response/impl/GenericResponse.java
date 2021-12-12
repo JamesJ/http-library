@@ -1,7 +1,7 @@
-package me.jamesj.http.library.server.response;
+package me.jamesj.http.library.server.response.impl;
 
+import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.routes.response.HttpResponse;
 
 /**
  * Created by James on 10/12/2021

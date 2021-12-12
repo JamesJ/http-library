@@ -5,6 +5,7 @@ import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
+import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.v2.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.HttpMethod;
@@ -49,8 +50,12 @@ public class VertxHttpRequest implements HttpRequest {
     
     @Override
     public void load() throws BodyParsingException {
-        String rawBody = routingContext.getBodyAsString();
-        this.body = BodyReader.read(rawBody, false, MediaType.parse(routingContext.parsedHeaders().contentType().component()));
+        if (method().hasBodySupport()) {
+            String rawBody = routingContext.getBodyAsString();
+            this.body = BodyReader.read(rawBody, false, MediaType.parse(routingContext.parsedHeaders().contentType().component()));
+        } else {
+            this.body = new EmptyBody();
+        }
     }
     
     @Override

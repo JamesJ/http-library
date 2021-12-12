@@ -7,7 +7,7 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
-import me.jamesj.http.library.server.routes.response.HttpResponse;
+import me.jamesj.http.library.server.response.HttpResponse;
 
 import java.util.concurrent.CompletableFuture;
 

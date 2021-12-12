@@ -8,7 +8,7 @@ import io.vertx.ext.web.handler.BodyHandler;
 import me.jamesj.http.library.server.routes.*;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
-import me.jamesj.http.library.server.routes.response.HttpResponse;
+import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.HttpConfiguration;
 import me.jamesj.http.library.server.HttpServer;
 import me.jamesj.http.library.server.HttpMethod;
@@ -45,7 +45,10 @@ public class VertxHttpServer implements HttpServer {
         io.vertx.core.http.HttpMethod method = toVertxHttpMethod(route.method());
         String path = route.path();
         
-        router.route(method, path).blockingHandler(BodyHandler.create(false));
+        if (route.method().hasBodySupport()) {
+            router.route(method, path).blockingHandler(BodyHandler.create(false));
+        }
+        
         for (HttpFilter filter : filters) {
             router.route(method, path).blockingHandler(new VertxHttpFilter(this, filter));
         }

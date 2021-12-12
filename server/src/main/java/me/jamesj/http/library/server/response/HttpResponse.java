@@ -1,4 +1,4 @@
-package me.jamesj.http.library.server.routes.response;
+package me.jamesj.http.library.server.response;
 
 
 import me.jamesj.http.library.server.routes.HttpRequest;

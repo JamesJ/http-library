@@ -2,7 +2,7 @@ package me.jamesj.http.library.server.impl.vertx.tests;
 
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
-import me.jamesj.http.library.server.response.GenericResponse;
+import me.jamesj.http.library.server.response.impl.GenericResponse;
 import me.jamesj.http.library.server.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
