@@ -1,6 +1,7 @@
 package me.jamesj.http.library.server.parameters;
 
 import com.google.common.net.MediaType;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.files.File;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
@@ -206,7 +207,14 @@ public interface Validator<T> {
                             failures.add(failure);
                         }
                     }
+
+                    try {
+                        parameter.parser().accepts(parameter.fetch(httpRequest));
+                    } catch (ParsingException e) {
+                        failures.add(e.getFailure());
+                    }
                 }
+
 
                 if (failures.isEmpty()) {
                     failureMap.put(parameter, failures.toArray(Failure[]::new));

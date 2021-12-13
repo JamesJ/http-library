@@ -1,8 +1,8 @@
 package me.jamesj.http.library.server.parameters.parser;
 
 import com.google.common.net.MediaType;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.files.File;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,33 +16,33 @@ public interface Parser<T> {
     }
 
     @NotNull
-    static StringParser<Number> asNumber() {
-        return NumberUtils::createNumber;
+    static NumberParser<Number> asNumber() {
+        return number -> number;
     }
 
     @NotNull
-    static StringParser<Integer> asInteger() {
-        return NumberUtils::createInteger;
+    static NumberParser<Integer> asInteger() {
+        return Number::intValue;
     }
 
     @NotNull
-    static StringParser<Double> asDouble() {
-        return NumberUtils::createDouble;
+    static NumberParser<Double> asDouble() {
+        return Number::doubleValue;
     }
 
     @NotNull
-    static StringParser<Long> asLong() {
-        return NumberUtils::createLong;
+    static NumberParser<Long> asLong() {
+        return Number::longValue;
     }
 
     @NotNull
-    static StringParser<Float> asFloat() {
-        return NumberUtils::createFloat;
+    static NumberParser<Float> asFloat() {
+        return Number::floatValue;
     }
 
     @NotNull
-    static StringParser<Byte> asByte() {
-        return NumberUtils::toByte;
+    static NumberParser<Byte> asByte() {
+        return Number::byteValue;
     }
 
     @NotNull
@@ -75,5 +75,9 @@ public interface Parser<T> {
     }
 
     @Nullable T parse(@NotNull Object data, Map<String, String> metadata);
+
+    default boolean accepts(Object data) throws ParsingException {
+        return true;
+    }
 
 }

@@ -12,8 +12,7 @@ public interface File {
     
     @NotNull
     MediaType mediaType();
-    
-    @Nullable
+
     byte[] content();
     
     class FileImpl implements File {
@@ -33,7 +32,7 @@ public interface File {
         }
         
         @Override
-        public MediaType mediaType() {
+        public @NotNull MediaType mediaType() {
             return this.mediaType;
         }
         
