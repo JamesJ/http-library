@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
+import com.google.common.net.HttpHeaders;
 import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.response.HttpResponse;
@@ -12,8 +13,10 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+@SuppressWarnings("UnstableApiUsage")
 public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRoute<T> implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
 
     public LambdaRoute(@NotNull String path, @NotNull HttpMethod method) {
@@ -53,6 +56,7 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         }
 
         return APIGatewayV2HTTPResponse.builder()
+                .withHeaders(Map.of(HttpHeaders.CONTENT_TYPE, response.getMediaType().toString()))
                 .withStatusCode(response.getStatusCode())
                 .withIsBase64Encoded(response.isBase64Encoded())
                 .withBody(response.build(httpRequest).toString())

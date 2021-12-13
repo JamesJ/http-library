@@ -1,5 +1,6 @@
 package me.jamesj.http.library.server.impl.vertx;
 
+import com.google.common.net.HttpHeaders;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
@@ -17,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
  * Created by James on 11/12/2021
  */
 
+@SuppressWarnings("UnstableApiUsage")
 public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<RoutingContext> {
     private final VertxHttpServer server;
     private final HttpRoute<T> httpRoute;
@@ -68,6 +70,7 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
             } else {
                 httpResponse = t;
             }
+            context.response().putHeader(HttpHeaders.CONTENT_TYPE, httpResponse.getMediaType().toString());
             context.response().write(httpResponse.build(httpRequest).toString());
             context.next();
         });
