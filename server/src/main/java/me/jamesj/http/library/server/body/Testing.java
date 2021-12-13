@@ -5,8 +5,8 @@ import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.parameters.ParameterHolder;
 import me.jamesj.http.library.server.parameters.files.File;
 import me.jamesj.http.library.server.parameters.parser.Parser;
-import me.jamesj.http.library.server.parameters.v2.Parameter;
-import me.jamesj.http.library.server.parameters.v2.Source;
+import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.Source;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

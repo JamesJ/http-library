@@ -1,4 +1,4 @@
-package me.jamesj.http.library.server.parameters.v2;
+package me.jamesj.http.library.server.parameters;
 
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.parameters.files.File;

@@ -2,8 +2,8 @@ package me.jamesj.http.library.server.routes.exceptions.impl;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import me.jamesj.http.library.server.parameters.v2.Parameter;
-import me.jamesj.http.library.server.parameters.v2.Validator;
+import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.util.JsonArrayCollector;

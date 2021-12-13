@@ -1,6 +1,6 @@
 package me.jamesj.http.library.server;
 
-import me.jamesj.http.library.server.parameters.v2.Parameter;
+import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRoute;

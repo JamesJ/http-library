@@ -2,7 +2,6 @@ package me.jamesj.http.library.server.parameters;
 
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
-import me.jamesj.http.library.server.parameters.v2.Parameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

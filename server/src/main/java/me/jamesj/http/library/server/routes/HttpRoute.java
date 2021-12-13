@@ -1,7 +1,7 @@
 package me.jamesj.http.library.server.routes;
 
 import me.jamesj.http.library.server.HttpMethod;
-import me.jamesj.http.library.server.parameters.v2.Parameter;
+import me.jamesj.http.library.server.parameters.Parameter;
 import org.slf4j.Logger;
 
 import java.util.Collection;

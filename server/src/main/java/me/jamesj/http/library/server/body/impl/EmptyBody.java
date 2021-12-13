@@ -1,7 +1,7 @@
 package me.jamesj.http.library.server.body.impl;
 
 import me.jamesj.http.library.server.body.Body;
-import me.jamesj.http.library.server.parameters.v2.Source;
+import me.jamesj.http.library.server.parameters.Source;
 
 /**
  * Created by James on 11/12/2021

@@ -4,7 +4,7 @@ import com.google.gson.*;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
-import me.jamesj.http.library.server.parameters.v2.Source;
+import me.jamesj.http.library.server.parameters.Source;
 
 import java.util.Base64;
 

@@ -1,6 +1,6 @@
 package me.jamesj.http.library.server.routes;
 
-import me.jamesj.http.library.server.parameters.v2.Parameter;
+import me.jamesj.http.library.server.parameters.Parameter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;

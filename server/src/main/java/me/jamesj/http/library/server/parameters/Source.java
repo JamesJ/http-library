@@ -1,6 +1,5 @@
-package me.jamesj.http.library.server.parameters.v2;
+package me.jamesj.http.library.server.parameters;
 
-import me.jamesj.http.library.server.parameters.ParameterHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

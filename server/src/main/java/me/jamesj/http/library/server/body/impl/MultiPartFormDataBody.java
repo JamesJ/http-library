@@ -8,7 +8,7 @@ import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.NoContentDispositionHeaderProvidedException;
 import me.jamesj.http.library.server.body.exceptions.impl.NoEntryNameProvidedException;
-import me.jamesj.http.library.server.parameters.v2.Source;
+import me.jamesj.http.library.server.parameters.Source;
 import org.apache.commons.fileupload.MultipartStream;
 
 import java.io.ByteArrayInputStream;
