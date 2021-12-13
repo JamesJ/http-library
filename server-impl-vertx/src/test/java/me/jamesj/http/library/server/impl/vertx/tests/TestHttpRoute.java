@@ -7,6 +7,8 @@ import me.jamesj.http.library.server.HttpMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.CompletableFuture;
+
 /**
  * Created by James on 10/12/2021
  */
@@ -31,9 +33,9 @@ public class TestHttpRoute implements HttpRoute<GenericResponse<String>> {
     public String path() {
         return "/test-path";
     }
-    
+
     @Override
-    public GenericResponse<String> handle(HttpRequest httpRequest) {
-        return GenericResponse.of(200, BODY);
+    public CompletableFuture<GenericResponse<String>> handle(HttpRequest httpRequest) {
+        return CompletableFuture.completedFuture(GenericResponse.of(200, BODY));
     }
 }

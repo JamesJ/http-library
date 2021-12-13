@@ -58,6 +58,10 @@ public interface Parameter<T> {
         public <K> Builder<K> parser(Parser<K> parser) {
             return new Builder<>(parser, this.name);
         }
+
+        public Parameter<String> build() {
+            return new Builder<>(Parser.asString(), this.name).build();
+        }
     }
 
     class ParameterImpl<T> implements Parameter<T> {

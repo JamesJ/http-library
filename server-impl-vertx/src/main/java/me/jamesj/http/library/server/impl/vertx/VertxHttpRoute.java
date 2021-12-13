@@ -31,7 +31,7 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
     @Override
     public void handle(RoutingContext routingContext) {
         CompletableFuture<T> completableFuture = null;
-        HttpRequest httpRequest = new VertxHttpRequest(routingContext);
+        HttpRequest httpRequest = new VertxHttpRequest(server.configuration().getRequestIdGenerator().get(), routingContext);
         try {
             httpRequest.load();
 
