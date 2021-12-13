@@ -1,5 +1,6 @@
 package me.jamesj.http.library.server.impl.lambda.test;
 
+import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpRequest;
 
@@ -19,5 +20,10 @@ public class TestResponse implements HttpResponse<String> {
     @Override
     public int getStatusCode() {
         return 200;
+    }
+
+    @Override
+    public MediaType getMediaType() {
+        return MediaType.ANY_TYPE;
     }
 }

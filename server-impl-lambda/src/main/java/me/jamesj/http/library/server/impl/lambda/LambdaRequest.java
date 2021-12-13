@@ -21,7 +21,6 @@ public class LambdaRequest implements HttpRequest {
 
     private final APIGatewayV2HTTPEvent requestEvent;
 
-
     private final String id, userAgent, path, ipAddress, contentType;
     private final HttpMethod method;
 
@@ -34,7 +33,7 @@ public class LambdaRequest implements HttpRequest {
         this.requestEvent = requestEvent;
 
         this.method = HttpMethod.valueOf(requestEvent.getRequestContext().getHttp().getMethod().toUpperCase());
-        this.id = "req_awsl_" + context.getAwsRequestId().replace("-", "");
+        this.id = "req_awsl_" + context.getAwsRequestId();
 
         this.userAgent = requestEvent.getHeaders().get(HttpHeaders.USER_AGENT);
         this.contentType = requestEvent.getHeaders().get(HttpHeaders.CONTENT_TYPE);
@@ -42,12 +41,18 @@ public class LambdaRequest implements HttpRequest {
         this.path = requestEvent.getRequestContext().getHttp().getPath();
 
         this.headers = new LinkedHashMap<>();
-        this.requestEvent.getHeaders().forEach((s, s2) -> this.headers.put(s.toLowerCase(), new String[]{s2}));
+        Map<String, String> awsHeaders = this.requestEvent.getHeaders();
+        if (awsHeaders != null) {
+            this.requestEvent.getHeaders().forEach((s, s2) -> this.headers.put(s.toLowerCase(), new String[]{s2}));
+        }
 
         this.query = new LinkedHashMap<>();
-        this.requestEvent.getQueryStringParameters().forEach((s, s2) -> this.query.put(s, new String[]{s2}));
+        Map<String, String> awsQueryParams = this.requestEvent.getQueryStringParameters();
+        if (awsQueryParams != null) {
+            this.requestEvent.getQueryStringParameters().forEach((s, s2) -> this.query.put(s, new String[]{s2}));
+        }
 
-        this.pathParams = this.requestEvent.getPathParameters();
+        this.pathParams = requestEvent.getPathParameters();
     }
 
     @Override
