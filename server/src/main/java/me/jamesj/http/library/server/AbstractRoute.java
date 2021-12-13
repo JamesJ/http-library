@@ -1,6 +1,7 @@
 package me.jamesj.http.library.server;
 
 import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRoute;
@@ -28,12 +29,19 @@ public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRo
         this.filters = new ArrayList<>();
     }
 
-    public void filters(HttpFilter... filters) {
-        this.filters.addAll(Arrays.asList(filters));
+    public void filters(@NotNull HttpFilter... filters) {
+        List<HttpFilter> httpFilters = new ArrayList<>();
+
+        if (!this.parameters.isEmpty()) {
+            httpFilters.add(new Validator.ValidatorFilter(this.parameters.toArray(Parameter[]::new)));
+        }
+        httpFilters.addAll(Arrays.asList(filters));
+
+        this.filters.addAll(httpFilters);
     }
 
-    protected <K> void parameter(Parameter<K> parameter) {
-        this.parameters.add(parameter);
+    protected void parameter(@NotNull Parameter<?>... parameter) {
+        this.parameters.addAll(Arrays.asList(parameter));
     }
 
     public Collection<HttpFilter> filters() {
