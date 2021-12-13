@@ -94,17 +94,17 @@ public class VertxHttpRequest implements HttpRequest {
     }
     
     @Override
-    public Map<String, String[]> headers() {
+    public @NotNull Map<String, String[]> headers() {
         return this.headers;
     }
     
     @Override
-    public Map<String, String[]> query() {
+    public @NotNull Map<String, String[]> query() {
         return this.query;
     }
     
     @Override
-    public Map<String, String> pathParams() {
+    public @NotNull Map<String, String> pathParams() {
         return this.pathParams;
     }
     

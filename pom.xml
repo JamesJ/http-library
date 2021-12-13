@@ -9,16 +9,8 @@
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>core</module>
-        <module>body</module>
-        <module>parameters</module>
-        <module>me.jamesj.http.library.server.routes</module>
-        <module>audit</module>
-        <module>me.jamesj.http.library.server.headers</module>
         <module>server</module>
         <module>server-impl-vertx</module>
-        <module>util</module>
-        <module>request</module>
     </modules>
 
     <dependencies>

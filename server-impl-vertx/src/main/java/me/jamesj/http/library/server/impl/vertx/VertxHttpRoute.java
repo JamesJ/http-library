@@ -3,12 +3,14 @@ package me.jamesj.http.library.server.impl.vertx;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
+import me.jamesj.http.library.server.response.HttpResponse;
+import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
-import me.jamesj.http.library.server.response.HttpResponse;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -18,31 +20,44 @@ import java.util.concurrent.CompletableFuture;
 public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<RoutingContext> {
     private final VertxHttpServer server;
     private final HttpRoute<T> httpRoute;
-    
-    public VertxHttpRoute(VertxHttpServer server, HttpRoute<T> route) {
+    private final List<HttpFilter> filters;
+
+    public VertxHttpRoute(VertxHttpServer server, HttpRoute<T> route, List<HttpFilter> filters) {
         this.server = server;
         this.httpRoute = route;
+        this.filters = filters;
     }
-    
+
     @Override
     public void handle(RoutingContext routingContext) {
-        CompletableFuture<T> completableFuture;
+        CompletableFuture<T> completableFuture = null;
         HttpRequest httpRequest = new VertxHttpRequest(routingContext);
         try {
             httpRequest.load();
-            completableFuture = this.httpRoute.handle(httpRequest);
+
+            boolean broke = false;
+            for (HttpFilter filter : filters) {
+                try {
+                    filter.filter(httpRequest).join();
+                } catch (Throwable throwable) {
+                    completableFuture = CompletableFuture.failedFuture(throwable);
+                    broke = true;
+                }
+            }
+            if (!broke) {
+                completableFuture = this.httpRoute.handle(httpRequest);
+            }
         } catch (BodyParsingException e) {
             completableFuture = CompletableFuture.failedFuture(e);
         }
-        
+
         handle(httpRequest, completableFuture, routingContext);
     }
-    
+
     public void handle(HttpRequest httpRequest, CompletableFuture<T> completableFuture, RoutingContext context) {
         completableFuture.whenComplete((t, throwable) -> {
-            HttpResponse httpResponse;
+            HttpResponse<?> httpResponse;
             if (throwable != null) {
-                HttpException httpException;
                 if (throwable instanceof HttpException) {
                     httpResponse = (HttpException) throwable;
                 } else {
