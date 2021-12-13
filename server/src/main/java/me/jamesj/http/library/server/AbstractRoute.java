@@ -29,15 +29,14 @@ public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRo
         this.filters = new ArrayList<>();
     }
 
-    public void filters(@NotNull HttpFilter... filters) {
-        List<HttpFilter> httpFilters = new ArrayList<>();
-
-        if (!this.parameters.isEmpty()) {
-            httpFilters.add(new Validator.ValidatorFilter(this.parameters.toArray(Parameter[]::new)));
-        }
-        httpFilters.addAll(Arrays.asList(filters));
+    protected void filters(@NotNull HttpFilter... filters) {
+        List<HttpFilter> httpFilters = new ArrayList<>(Arrays.asList(filters));
 
         this.filters.addAll(httpFilters);
+    }
+
+    protected void validate() {
+        filters(new Validator.ValidatorFilter(parameters.toArray(Parameter[]::new)));
     }
 
     protected void parameter(@NotNull Parameter<?>... parameter) {

@@ -34,8 +34,11 @@ public interface NumberParser<T extends Number> extends StringParser<T> {
 
     @Override
     default boolean accepts(Object data) throws ParsingException {
+        if (data == null) {
+            throw new ParsingException(Validator.Failure.of("Value is null"));
+        }
         String str;
-        if(data instanceof String) {
+        if (data instanceof String) {
             str = (String) data;
         } else {
             str = data.toString();

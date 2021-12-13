@@ -15,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @SuppressWarnings("UnstableApiUsage")
 public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRoute<T> implements RequestHandler<APIGatewayV2HTTPEvent, APIGatewayV2HTTPResponse> {
@@ -31,7 +32,13 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         for (HttpFilter filter : filters()) {
             try {
                 filter.filter(httpRequest).join();
+            } catch (CompletionException completionException) {
+                getLogger().info("Hit completion exception", completionException);
+                completableFuture = CompletableFuture.failedFuture(completionException.getCause());
+                // return here just to make sure there's no chance of invoking the handler
+                return handleResult(httpRequest, completableFuture);
             } catch (Throwable throwable) {
+                getLogger().info("Hit throwable", throwable);
                 completableFuture = CompletableFuture.failedFuture(throwable);
                 // return here just to make sure there's no chance of invoking the handler
                 return handleResult(httpRequest, completableFuture);
@@ -48,10 +55,19 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         try {
             response = completableFuture.join();
         } catch (Throwable throwable) {
+            if (throwable instanceof CompletionException) {
+                throwable = throwable.getCause();
+            }
+
             if (throwable instanceof HttpResponse) {
                 response = (HttpResponse<?>) throwable;
             } else {
-                response = new InternalHttpServerException(throwable);
+                throwable.printStackTrace();
+
+                InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
+                getLogger().error("Caught exception (ID: {}) in request {}", internalHttpServerException.getId(), httpRequest.requestId(), throwable);
+
+                response = internalHttpServerException;
             }
         }
 

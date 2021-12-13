@@ -9,7 +9,7 @@ import java.util.function.Supplier;
 
 public class InternalHttpServerException extends HttpException {
     
-    public static Supplier<String> ERROR_ID_GENERATOR = Xid::string;
+    public static Supplier<String> ERROR_ID_GENERATOR = () -> "err_" + Xid.string();
     
     
     private final String id;
