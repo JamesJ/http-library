@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
 
 public interface Parameter<T> {
 
@@ -19,7 +20,7 @@ public interface Parameter<T> {
     @NotNull
     String name();
 
-    Collection<Validator<T>> validators();
+    List<Validator<T>> validators();
 
     /**
      * @return used to parse the incoming data
@@ -64,9 +65,9 @@ public interface Parameter<T> {
         private final Parser<T> parser;
         private final boolean sensitive, required;
         private final Collection<Source> sources;
-        private final Collection<Validator<T>> validators;
+        private final List<Validator<T>> validators;
 
-        public ParameterImpl(String name, String description, Parser<T> parser, boolean sensitive, boolean required, Collection<Source> sources, Collection<Validator<T>> validators) {
+        public ParameterImpl(String name, String description, Parser<T> parser, boolean sensitive, boolean required, Collection<Source> sources, List<Validator<T>> validators) {
             this.name = name;
             this.description = description;
             this.parser = parser;
@@ -107,7 +108,7 @@ public interface Parameter<T> {
         }
 
         @Override
-        public Collection<Validator<T>> validators() {
+        public List<Validator<T>> validators() {
             return this.validators;
         }
 
@@ -136,7 +137,7 @@ public interface Parameter<T> {
 
         private final String name;
         private final Collection<Source> sources;
-        private final Collection<Validator<T>> validators;
+        private final List<Validator<T>> validators;
         private final Parser<T> parser;
         private String description;
         private boolean required, sensitive;
@@ -165,6 +166,9 @@ public interface Parameter<T> {
         public Builder<T> length(@Nullable Integer minimum, @Nullable Integer maximum) {
             if (maximum != null) {
                 validator(Validator.max(maximum));
+            }
+            if (minimum != null) {
+                validator(Validator.min(minimum));
             }
             return this;
         }
@@ -218,7 +222,7 @@ public interface Parameter<T> {
         }
 
         public Parameter<T> build() {
-            return new ParameterImpl<>(this.name, this.description, this.parser, this.sensitive, this.required, this.sources, this.validators);
+            return new ParameterImpl<T>(this.name, this.description, this.parser, this.sensitive, this.required, this.sources, this.validators);
         }
     }
 

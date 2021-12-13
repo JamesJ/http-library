@@ -190,17 +190,21 @@ public interface Validator<T> {
             return this.logger;
         }
 
+        @SuppressWarnings({"rawtypes", "unchecked"})
         @Override
         public @NotNull CompletableFuture<@Nullable Void> filter(@NotNull HttpRequest httpRequest) {
             Map<Parameter<?>, Failure[]> failureMap = new HashMap<>();
 
-            for (Parameter<?> parameter : parameters) {
+            for (Parameter parameter : parameters) {
                 List<Failure> failures = new ArrayList<>();
-                for (Validator validator : parameter.validators()) {
-                    Object o = httpRequest.get(parameter);
-                    Failure failure = validator.test(o);
-                    if (failure != null) {
-                        failures.add(failure);
+                List<Validator> validators = parameter.validators();
+                if (validators != null) {
+                    for (Validator validator : validators) {
+                        Object o = httpRequest.get(parameter);
+                        Failure failure = validator.test(o);
+                        if (failure != null) {
+                            failures.add(failure);
+                        }
                     }
                 }
 
