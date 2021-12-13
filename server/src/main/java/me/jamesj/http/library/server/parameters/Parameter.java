@@ -1,5 +1,7 @@
 package me.jamesj.http.library.server.parameters;
 
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
+import me.jamesj.http.library.server.parameters.files.File;
 import me.jamesj.http.library.server.parameters.parser.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,15 +12,15 @@ import java.util.List;
 
 public interface Parameter<T> {
 
-    static CachedBuilderAwaitingType name(String name) {
-        return new CachedBuilderAwaitingType(name);
+    static Builder<String> string() {
+        return new Builder<>(Parser.asString());
     }
-
-    /**
-     * @return the name of this parameter
-     */
-    @NotNull
-    String name();
+    static Builder<Integer> integer() {
+        return new Builder<>(Parser.asInteger());
+    }
+    static Builder<File> file() {
+        return new Builder<>(Parser.asFile());
+    }
 
     List<Validator<T>> validators();
 
@@ -46,33 +48,16 @@ public interface Parameter<T> {
     Collection<@NotNull Source> sources();
 
     @Nullable
-    T fetch(@NotNull ParameterHolder request);
-
-    class CachedBuilderAwaitingType {
-        private final String name;
-
-        public CachedBuilderAwaitingType(String name) {
-            this.name = name;
-        }
-
-        public <K> Builder<K> parser(Parser<K> parser) {
-            return new Builder<>(parser, this.name);
-        }
-
-        public Parameter<String> build() {
-            return new Builder<>(Parser.asString(), this.name).build();
-        }
-    }
+    T fetch(@NotNull ParameterHolder request) throws ParsingException;
 
     class ParameterImpl<T> implements Parameter<T> {
-        private final String name, description;
+        private final String description;
         private final Parser<T> parser;
         private final boolean sensitive, required;
         private final Collection<Source> sources;
         private final List<Validator<T>> validators;
 
-        public ParameterImpl(String name, String description, Parser<T> parser, boolean sensitive, boolean required, Collection<Source> sources, List<Validator<T>> validators) {
-            this.name = name;
+        public ParameterImpl(String description, Parser<T> parser, boolean sensitive, boolean required, Collection<Source> sources, List<Validator<T>> validators) {
             this.description = description;
             this.parser = parser;
             this.sensitive = sensitive;
@@ -80,12 +65,6 @@ public interface Parameter<T> {
             this.sources = sources;
             this.validators = validators;
         }
-
-        @Override
-        public @NotNull String name() {
-            return this.name;
-        }
-
         @Override
         public @NotNull Parser<T> parser() {
             return this.parser;
@@ -117,7 +96,7 @@ public interface Parameter<T> {
         }
 
         @Override
-        public @Nullable T fetch(@NotNull ParameterHolder request) {
+        public @Nullable T fetch(@NotNull ParameterHolder request) throws ParsingException {
             if (sources().isEmpty()) {
                 return null;
             }
@@ -125,30 +104,28 @@ public interface Parameter<T> {
             for (Source source : sources()) {
                 Source.Result result = source.collect(request);
                 if (result != null) {
-                    return handle(result);
+                    return handle(this, result);
                 }
             }
             return null;
         }
 
-        private T handle(Source.Result result) {
-            return this.parser.parse(result.getData(), result.getMetadata());
+        private T handle(Parameter<T> parameter, Source.Result result) throws ParsingException {
+            return this.parser.parse(parameter, result.getData(), result.getMetadata());
         }
 
     }
 
     class Builder<T> {
 
-        private final String name;
         private final Collection<Source> sources;
         private final List<Validator<T>> validators;
         private final Parser<T> parser;
         private String description;
         private boolean required, sensitive;
 
-        protected Builder(Parser<T> parser, String name) {
+        protected Builder(Parser<T> parser) {
             this.parser = parser;
-            this.name = name;
 
             this.sources = new LinkedList<>();
             this.validators = new LinkedList<>();
@@ -226,7 +203,7 @@ public interface Parameter<T> {
         }
 
         public Parameter<T> build() {
-            return new ParameterImpl<T>(this.name, this.description, this.parser, this.sensitive, this.required, this.sources, this.validators);
+            return new ParameterImpl<T>(this.description, this.parser, this.sensitive, this.required, this.sources, this.validators);
         }
     }
 

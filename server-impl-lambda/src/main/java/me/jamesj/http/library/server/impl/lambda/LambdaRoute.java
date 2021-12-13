@@ -7,10 +7,13 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.google.common.net.HttpHeaders;
 import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
+import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
+import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -45,7 +48,11 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             }
         }
 
-        completableFuture = handle(httpRequest);
+        try {
+            completableFuture = handle(httpRequest);
+        } catch (ParsingException e) {
+            completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
+        }
 
         return handleResult(httpRequest, completableFuture);
     }

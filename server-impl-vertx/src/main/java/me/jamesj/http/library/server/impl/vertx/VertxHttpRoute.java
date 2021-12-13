@@ -4,14 +4,18 @@ import com.google.common.net.HttpHeaders;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
+import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
+import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -51,6 +55,8 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
             }
         } catch (BodyParsingException e) {
             completableFuture = CompletableFuture.failedFuture(e);
+        } catch (ParsingException e) {
+            completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         }
 
         handle(httpRequest, completableFuture, routingContext);

@@ -199,22 +199,28 @@ public interface Validator<T> {
             for (Parameter parameter : parameters) {
                 List<Failure> failures = new ArrayList<>();
                 List<Validator> validators = parameter.validators();
+
+                Object obj = null;
+                try {
+                    obj = parameter.fetch(httpRequest);
+                } catch (ParsingException e) {
+                    failures.add(e.getFailure());
+                }
+
+                if (obj == null && parameter.required()) {
+                    failures.add(Failure.of("Value not provided"));
+                    continue;
+                }
+
+
                 if (validators != null) {
                     for (Validator validator : validators) {
-                        Object o = httpRequest.get(parameter);
-                        Failure failure = validator.test(o);
+                        Failure failure = validator.test(obj);
                         if (failure != null) {
                             failures.add(failure);
                         }
                     }
-
-                    try {
-                        parameter.parser().accepts(parameter.fetch(httpRequest));
-                    } catch (ParsingException e) {
-                        failures.add(e.getFailure());
-                    }
                 }
-
 
                 if (!failures.isEmpty()) {
                     failureMap.put(parameter, failures.toArray(Failure[]::new));

@@ -2,6 +2,7 @@ package me.jamesj.http.library.server.parameters.parser;
 
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
+import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.parameters.files.File;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,60 +13,60 @@ public interface Parser<T> {
 
     @NotNull
     static StringParser<String> asString() {
-        return str -> str;
+        return (parameter, str) -> str;
     }
 
     @NotNull
     static NumberParser<Number> asNumber() {
-        return number -> number;
+        return (parameter, number) -> number;
     }
 
     @NotNull
     static NumberParser<Integer> asInteger() {
-        return Number::intValue;
+        return (parameter, number) -> number.intValue();
     }
 
     @NotNull
     static NumberParser<Double> asDouble() {
-        return Number::doubleValue;
+        return (parameter, number) -> number.doubleValue();
     }
 
     @NotNull
     static NumberParser<Long> asLong() {
-        return Number::longValue;
+        return (parameter, number) -> number.longValue();
     }
 
     @NotNull
     static NumberParser<Float> asFloat() {
-        return Number::floatValue;
+        return (parameter, number) -> number.floatValue();
     }
 
     @NotNull
     static NumberParser<Byte> asByte() {
-        return Number::byteValue;
+        return (parameter, number) -> number.byteValue();
     }
 
     @NotNull
     static StringParser<Boolean> asBoolean() {
-        return (str) -> {
+        return (parameter, str) -> {
             if (str.equalsIgnoreCase("yes")
                     || str.equalsIgnoreCase("y")
                     || str.equalsIgnoreCase("t")
                     || str.equalsIgnoreCase("1")) {
                 return true;
             }
-            return asStrictBoolean().parse(str);
+            return asStrictBoolean().parse(parameter, str);
         };
     }
 
     @NotNull
     static StringParser<Boolean> asStrictBoolean() {
-        return str -> str.equalsIgnoreCase("true");
+        return (parameter, str) -> str.equalsIgnoreCase("true");
     }
 
     @NotNull
     static Parser<File> asFile() {
-        return (data, metadata) -> {
+        return (parameter, data, metadata) -> {
             if (data instanceof byte[]) {
                 MediaType mediaType = MediaType.parse(metadata.get("content-type"));
                 return new File.FileImpl(metadata.get("name"), mediaType, (byte[]) data);
@@ -74,10 +75,6 @@ public interface Parser<T> {
         };
     }
 
-    @Nullable T parse(@NotNull Object data, Map<String, String> metadata);
-
-    default boolean accepts(Object data) throws ParsingException {
-        return true;
-    }
+    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException;
 
 }

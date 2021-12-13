@@ -1,5 +1,6 @@
 package me.jamesj.http.library.server.parameters;
 
+import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +36,13 @@ public interface Source {
 
     @Nullable
     Result collect(@NotNull ParameterHolder request);
+
+    default JsonObject toJson() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", name());
+        jsonObject.addProperty("where", from());
+        return jsonObject;
+    }
 
     abstract class AbstractSource implements Source {
         private final String name, from;

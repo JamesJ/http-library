@@ -2,6 +2,7 @@ package me.jamesj.http.library.server.parameters;
 
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,5 +28,5 @@ public interface ParameterHolder {
     @NotNull
     Body body();
     
-    @Nullable <T> T get(@NotNull Parameter<T> parameter);
+    @Nullable <T> T get(@NotNull Parameter<T> parameter) throws ParsingException;
 }

@@ -3,10 +3,10 @@ package me.jamesj.http.library.server.routes.exceptions.impl;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.Source;
 import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
-import me.jamesj.http.library.server.util.JsonArrayCollector;
 
 import java.util.Map;
 
@@ -29,8 +29,10 @@ public class MissingParametersException extends HttpException {
                 elements.add(toJson(failure));
             }
             JsonObject object = new JsonObject();
-            object.addProperty("name", parameter.name());
-            object.add("in", parameter.sources().stream().map(source -> source.name().toLowerCase()).collect(new JsonArrayCollector()));
+            JsonArray from = new JsonArray();
+            parameter.sources().stream().map(Source::toJson).forEach(from::add);
+
+            object.add("from", from);
 
             if (parameter.description() != null) {
                 object.addProperty("description", parameter.description());

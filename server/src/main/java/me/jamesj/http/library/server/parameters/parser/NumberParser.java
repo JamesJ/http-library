@@ -1,6 +1,7 @@
 package me.jamesj.http.library.server.parameters.parser;
 
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
+import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.parameters.Validator;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
@@ -12,15 +13,15 @@ import java.util.Map;
 public interface NumberParser<T extends Number> extends StringParser<T> {
 
     @Nullable
-    T parse(@NotNull Number number);
+    T parse(Parameter<T> parameter, @NotNull Number number) throws ParsingException;
 
     @Override
-    default @Nullable T parse(@NotNull String str) {
-        return parse(NumberUtils.createNumber(str));
+    default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull String str) throws ParsingException {
+        return parse(parameter, NumberUtils.createNumber(str));
     }
 
     @Override
-    default @Nullable T parse(@NotNull Object data, Map<String, String> metadata) {
+    default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException {
         String string;
         if (data instanceof String) {
             string = (String) data;
@@ -29,23 +30,18 @@ public interface NumberParser<T extends Number> extends StringParser<T> {
         } else {
             string = data.toString();
         }
-        return parse(string);
-    }
 
-    @Override
-    default boolean accepts(Object data) throws ParsingException {
-        if (data == null) {
-            throw new ParsingException(Validator.Failure.of("Value is null"));
-        }
         String str;
         if (data instanceof String) {
             str = (String) data;
         } else {
             str = data.toString();
         }
+        System.out.println("str=" + str);
         if (NumberUtils.isCreatable(str)) {
-            return true;
+            return parse(parameter, string);
         }
-        throw new ParsingException(Validator.Failure.of("Value is not a valid number"));
+        throw new ParsingException(parameter, Validator.Failure.of("Value is not a valid number"));
     }
+
 }

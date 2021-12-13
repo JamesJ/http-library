@@ -10,6 +10,7 @@ import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
@@ -87,7 +88,7 @@ public class LambdaRequest implements HttpRequest {
     }
 
     @Override
-    public <T> @Nullable T get(@NotNull Parameter<T> parameter) {
+    public <T> @Nullable T get(@NotNull Parameter<T> parameter) throws ParsingException {
         return parameter.fetch(this);
     }
 

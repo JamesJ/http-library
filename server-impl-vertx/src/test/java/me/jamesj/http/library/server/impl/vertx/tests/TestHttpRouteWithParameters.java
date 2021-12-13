@@ -20,7 +20,8 @@ public class TestHttpRouteWithParameters implements HttpRoute<GenericResponse<St
 
     public static final String BODY = "Hello from /test-path-with-parameters";
 
-    private static final Parameter<String> PARAMETER_NAME = Parameter.name("name")
+    private static final Parameter<String> PARAMETER_NAME = Parameter.string()
+            .query("name")
             .build();
 
     private final Logger logger = LoggerFactory.getLogger(TestHttpRouteWithParameters.class);

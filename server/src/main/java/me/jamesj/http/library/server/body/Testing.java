@@ -2,11 +2,11 @@ package me.jamesj.http.library.server.body;
 
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
-import me.jamesj.http.library.server.parameters.ParameterHolder;
-import me.jamesj.http.library.server.parameters.files.File;
-import me.jamesj.http.library.server.parameters.parser.Parser;
+import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.ParameterHolder;
 import me.jamesj.http.library.server.parameters.Source;
+import me.jamesj.http.library.server.parameters.files.File;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,43 +21,40 @@ public class Testing {
 
         try {
             Body body = BodyReader.read(content, true, mediaType);
-            
+
             Source.Result result = body.get("file");
-            Parameter<File> file = Parameter.name("File attachment")
-                .parser(Parser.asFile())
-                .source(Source.form("file"))
-                .build();
-            Parameter<String> name = Parameter.name("Your name")
-                .parser(Parser.asString())
-                .source(Source.form("name"))
-                .build();
-            
-            Parameter<Integer> age = Parameter.name("Your age")
-                .parser(Parser.asInteger())
-                .source(Source.form("age"))
-                .build();
-            
+            Parameter<File> file = Parameter.file()
+                    .source(Source.form("file"))
+                    .build();
+            Parameter<String> name = Parameter.string()
+                    .source(Source.form("name"))
+                    .build();
+
+            Parameter<Integer> age = Parameter.integer()
+                    .source(Source.form("age"))
+                    .build();
+
             ParameterHolder parameterHolder = build(body);
             System.out.println("file=" + file.fetch(parameterHolder));
             System.out.println("name=" + name.fetch(parameterHolder));
             System.out.println("age=" + age.fetch(parameterHolder));
-        } catch (BodyParsingException e) {
+        } catch (BodyParsingException | ParsingException e) {
             e.printStackTrace();
         }
     }
-    
+
     private static ParameterHolder build(Body body) {
         return new ParameterHolder() {
             @Override
             public @NotNull Map<String, String[]> headers() {
                 return null;
             }
-    
+
             @Override
             public @NotNull Map<String, String[]> query() {
                 return null;
             }
-    
+
             @Override
             public @NotNull Map<String, String> pathParams() {
                 return null;
@@ -72,7 +69,7 @@ public class Testing {
             public @NotNull Body body() {
                 return body;
             }
-    
+
             @Override
             public <T> @Nullable T get(@NotNull Parameter<T> parameter) {
                 return null;
