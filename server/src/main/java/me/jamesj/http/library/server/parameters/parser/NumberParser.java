@@ -31,14 +31,8 @@ public interface NumberParser<T extends Number> extends StringParser<T> {
             string = data.toString();
         }
 
-        String str;
-        if (data instanceof String) {
-            str = (String) data;
-        } else {
-            str = data.toString();
-        }
-        System.out.println("str=" + str);
-        if (NumberUtils.isCreatable(str)) {
+        System.out.println("str=" + string);
+        if (NumberUtils.isCreatable(string)) {
             return parse(parameter, string);
         }
         throw new ParsingException(parameter, Validator.Failure.of("Value is not a valid number"));

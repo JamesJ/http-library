@@ -212,7 +212,6 @@ public interface Validator<T> {
                     continue;
                 }
 
-
                 if (validators != null) {
                     for (Validator validator : validators) {
                         Failure failure = validator.test(obj);
