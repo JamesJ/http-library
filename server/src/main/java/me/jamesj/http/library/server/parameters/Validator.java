@@ -2,34 +2,41 @@ package me.jamesj.http.library.server.parameters;
 
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.parameters.files.File;
+import me.jamesj.http.library.server.routes.HttpFilter;
+import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public interface Validator<T> {
-    
+
     static <T> Validator<T> min(int length) {
         return new MinimumLengthValidator(length);
     }
-    
+
     static <T> Validator<T> max(int length) {
         return new MaximumLengthValidator(length);
     }
-    
+
     static Validator<File> type(MediaType... types) {
         return new MediaTypeValidator(types);
     }
-    
+
     @Nullable
     Failure test(@Nullable T t);
-    
+
     class MinimumLengthValidator implements Validator {
-        
+
         private final int value;
         private final String failureMessage;
-        
+
         /**
          * @param value          - the desired minimum length
          * @param failureMessage - the failure message, can use the parameters  minimum length and current length via %s
@@ -38,14 +45,14 @@ public interface Validator<T> {
             this.value = value;
             this.failureMessage = failureMessage;
         }
-        
+
         /**
          * @param value - the desired minimum length
          */
         public MinimumLengthValidator(int value) {
             this(value, "Value is too short, must be a minimum of %s (current: %s)");
         }
-        
+
         @Override
         public @Nullable Failure test(@Nullable Object o) {
             if (o instanceof Number) {
@@ -69,12 +76,12 @@ public interface Validator<T> {
             return null;
         }
     }
-    
+
     class MaximumLengthValidator implements Validator {
-        
+
         private final int value;
         private final String failureMessage;
-        
+
         /**
          * @param value          - the desired maximum length
          * @param failureMessage - the failure message, can use the parameters maximum length and current length via %s
@@ -83,14 +90,14 @@ public interface Validator<T> {
             this.value = value;
             this.failureMessage = failureMessage;
         }
-        
+
         /**
          * @param value - the desired maximum length
          */
         public MaximumLengthValidator(int value) {
             this(value, "Value is too long, must be a maximum of %s (current: %s)");
         }
-        
+
         @Override
         public @Nullable Failure test(@Nullable Object o) {
             if (o instanceof Number) {
@@ -114,12 +121,12 @@ public interface Validator<T> {
             return null;
         }
     }
-    
+
     class MediaTypeValidator implements Validator<File> {
-        
+
         private final MediaType[] value;
         private final String failureMessage;
-        
+
         /**
          * @param value          - the desired maximum length
          * @param failureMessage - the failure message, can use the parameters allowed and current via %s
@@ -128,14 +135,14 @@ public interface Validator<T> {
             this.value = value;
             this.failureMessage = failureMessage;
         }
-        
+
         /**
          * @param value - the desired maximum length
          */
         public MediaTypeValidator(MediaType[] value) {
             this(value, "Media type is not allowed, only accepts %s (current: %s)");
         }
-        
+
         @Override
         public @Nullable Failure test(@Nullable File file) {
             for (MediaType mediaType : value) {
@@ -145,26 +152,67 @@ public interface Validator<T> {
             }
             return Failure.of(String.format(failureMessage, allowed(), file.mediaType().toString()));
         }
-        
+
         private String allowed() {
             return Arrays.stream(value).map(MediaType::toString).collect(Collectors.joining(","));
         }
     }
-    
+
     class Failure {
-        
+
         private final String message;
-        
+
         public Failure(String message) {
             this.message = message;
         }
-        
+
         public static Failure of(String reason) {
             return new Failure(reason);
         }
-        
+
         public String getMessage() {
             return message;
+        }
+    }
+
+    class ValidatorFilter implements HttpFilter {
+
+        private final Logger logger;
+        private final Parameter<?>[] parameters;
+
+        public ValidatorFilter(Parameter<?>[] parameters) {
+            this.logger = LoggerFactory.getLogger(getClass());
+            this.parameters = parameters;
+        }
+
+        @Override
+        public @NotNull Logger getLogger() {
+            return this.logger;
+        }
+
+        @Override
+        public @NotNull CompletableFuture<@Nullable Void> filter(@NotNull HttpRequest httpRequest) {
+            Map<Parameter<?>, Failure[]> failureMap = new HashMap<>();
+
+            for (Parameter<?> parameter : parameters) {
+                List<Failure> failures = new ArrayList<>();
+                for (Validator validator : parameter.validators()) {
+                    Object o = httpRequest.get(parameter);
+                    Failure failure = validator.test(o);
+                    if (failure != null) {
+                        failures.add(failure);
+                    }
+                }
+
+                if (failures.isEmpty()) {
+                    failureMap.put(parameter, failures.toArray(Failure[]::new));
+                }
+            }
+
+            if (failureMap.isEmpty()) {
+                return CompletableFuture.completedFuture(null);
+            }
+            return CompletableFuture.failedFuture(new MissingParametersException(failureMap));
         }
     }
 }

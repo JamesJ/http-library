@@ -41,7 +41,7 @@ public interface Source {
         }
         
         @Override
-        public String name() {
+        public @NotNull String name() {
             return this.name;
         }
     }

@@ -62,7 +62,12 @@ public class Testing {
             public @NotNull Map<String, String> pathParams() {
                 return null;
             }
-    
+
+            @Override
+            public void load() throws BodyParsingException {
+
+            }
+
             @Override
             public @NotNull Body body() {
                 return body;
