@@ -10,8 +10,8 @@ import java.util.List;
 
 public interface Parameter<T> {
 
-    static <T> CachedBuilderAwaitingType<T> name(String name) {
-        return new CachedBuilderAwaitingType<>(name);
+    static CachedBuilderAwaitingType name(String name) {
+        return new CachedBuilderAwaitingType(name);
     }
 
     /**
@@ -48,7 +48,7 @@ public interface Parameter<T> {
     @Nullable
     T fetch(@NotNull ParameterHolder request);
 
-    class CachedBuilderAwaitingType<T> {
+    class CachedBuilderAwaitingType {
         private final String name;
 
         public CachedBuilderAwaitingType(String name) {

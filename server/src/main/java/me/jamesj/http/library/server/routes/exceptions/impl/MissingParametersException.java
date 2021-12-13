@@ -35,6 +35,8 @@ public class MissingParametersException extends HttpException {
             if (parameter.description() != null) {
                 object.addProperty("description", parameter.description());
             }
+
+            object.add("failures", elements);
             array.add(object);
         }
 

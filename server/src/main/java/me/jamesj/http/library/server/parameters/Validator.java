@@ -216,7 +216,7 @@ public interface Validator<T> {
                 }
 
 
-                if (failures.isEmpty()) {
+                if (!failures.isEmpty()) {
                     failureMap.put(parameter, failures.toArray(Failure[]::new));
                 }
             }
