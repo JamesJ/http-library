@@ -1,25 +1,23 @@
 package me.jamesj.http.library.server;
 
 import me.jamesj.http.library.server.parameters.v2.Parameter;
+import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpResponse;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 
-public abstract class AbstractRoute<T extends HttpResponse<T>> implements HttpRoute<T> {
+public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRoute<T> {
 
     private final String path;
     private final HttpMethod method;
     private final Logger logger;
 
-    private final Collection<Parameter<?>> parameters;
-    private final Collection<HttpFilter> filters;
+    private final List<Parameter<?>> parameters;
+    private final List<HttpFilter> filters;
 
     public AbstractRoute(@NotNull String path, @NotNull HttpMethod method) {
         this.path = path;
@@ -36,6 +34,10 @@ public abstract class AbstractRoute<T extends HttpResponse<T>> implements HttpRo
 
     protected <K> void parameter(Parameter<K> parameter) {
         this.parameters.add(parameter);
+    }
+
+    public Collection<HttpFilter> filters() {
+        return Collections.unmodifiableList(this.filters);
     }
 
     @Override
