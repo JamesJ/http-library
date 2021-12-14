@@ -124,4 +124,19 @@ public class VertxHttpRequest implements HttpRequest {
     public <T> @Nullable T get(@NotNull Parameter<T> parameter) throws ParsingException {
         return parameter.fetch(this);
     }
+
+    @Override
+    public <K> void with(String key, K k) {
+        routingContext.put(key, k);
+    }
+
+    @Override
+    public boolean contains(String key) {
+        return routingContext.data().containsKey(key);
+    }
+
+    @Override
+    public <K> K get(String key) {
+        return routingContext.get(key);
+    }
 }

@@ -2,10 +2,8 @@ package me.jamesj.http.library.server.impl.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.github.shamil.Xid;
 import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
-import com.google.gson.Gson;
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
@@ -17,12 +15,15 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LambdaRequest implements HttpRequest {
 
     private final APIGatewayV2HTTPEvent requestEvent;
+
+    private final Map<String, Object> map;
 
     private final String id, userAgent, path, ipAddress, contentType;
     private final HttpMethod method;
@@ -32,10 +33,12 @@ public class LambdaRequest implements HttpRequest {
 
     private Body body;
 
-    public LambdaRequest(APIGatewayV2HTTPEvent requestEvent, Context context) {
+    public LambdaRequest(HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
+        this.map = new HashMap<>();
+
         this.requestEvent = requestEvent;
 
-        this.method = HttpMethod.valueOf(requestEvent.getRequestContext().getHttp().getMethod().toUpperCase());
+        this.method = httpMethod;
         this.id = "req_awsl_" + context.getAwsRequestId();
 
         this.userAgent = requestEvent.getHeaders().get(HttpHeaders.USER_AGENT);
@@ -120,5 +123,20 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public String contentType() {
         return this.contentType;
+    }
+
+    @Override
+    public <K> void with(String key, K k) {
+        this.map.put(key, k);
+    }
+
+    @Override
+    public boolean contains(String key) {
+        return this.map.containsKey(key);
+    }
+
+    @Override
+    public <K> K get(String key) {
+        return (K) this.map.get(key);
     }
 }

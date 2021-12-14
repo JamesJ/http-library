@@ -59,7 +59,12 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
             completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         }
 
-        handle(httpRequest, completableFuture, routingContext);
+        try {
+
+            handle(httpRequest, completableFuture, routingContext);
+        } catch (Throwable throwable) {
+            completableFuture = CompletableFuture.failedFuture(throwable);
+        }
     }
 
     public void handle(HttpRequest httpRequest, CompletableFuture<T> completableFuture, RoutingContext context) {

@@ -31,7 +31,6 @@ public interface NumberParser<T extends Number> extends StringParser<T> {
             string = data.toString();
         }
 
-        System.out.println("str=" + string);
         if (NumberUtils.isCreatable(string)) {
             return parse(parameter, string);
         }

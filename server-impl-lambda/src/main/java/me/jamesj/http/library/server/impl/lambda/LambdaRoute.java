@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.google.common.net.HttpHeaders;
+import com.google.gson.Gson;
 import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
@@ -29,7 +30,9 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
 
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
-        HttpRequest httpRequest = new LambdaRequest(event, context);
+        getLogger().info("event={}", new Gson().toJson(event));
+        getLogger().info("context={}", new Gson().toJson(context));
+        HttpRequest httpRequest = new LambdaRequest(method(), event, context);
 
         CompletableFuture<T> completableFuture;
         for (HttpFilter filter : filters()) {
@@ -52,6 +55,8 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             completableFuture = handle(httpRequest);
         } catch (ParsingException e) {
             completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
+        } catch (Throwable throwable) {
+            completableFuture = CompletableFuture.failedFuture(throwable);
         }
 
         return handleResult(httpRequest, completableFuture);
@@ -60,7 +65,11 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
     private APIGatewayV2HTTPResponse handleResult(HttpRequest httpRequest, CompletableFuture<T> completableFuture) {
         HttpResponse<?> response;
         try {
+            getLogger().info("completableFuture=" + completableFuture);
             response = completableFuture.join();
+            if (response == null) {
+                response = new InternalHttpServerException("Internal server error", new NullPointerException("Response was null?"));
+            }
         } catch (Throwable throwable) {
             if (throwable instanceof CompletionException) {
                 throwable = throwable.getCause();
