@@ -85,6 +85,6 @@ public interface Parser<T> {
         };
     }
 
-    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException;
+    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) ;
 
 }

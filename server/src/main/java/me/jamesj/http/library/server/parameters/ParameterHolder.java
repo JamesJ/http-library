@@ -28,5 +28,5 @@ public interface ParameterHolder {
     @NotNull
     Body body();
     
-    @Nullable <T> T get(@NotNull Parameter<T> parameter) throws ParsingException;
+    @Nullable <T> T get(@NotNull Parameter<T> parameter);
 }

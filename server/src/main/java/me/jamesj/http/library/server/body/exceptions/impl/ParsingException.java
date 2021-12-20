@@ -3,7 +3,7 @@ package me.jamesj.http.library.server.body.exceptions.impl;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.parameters.Validator;
 
-public class ParsingException extends Exception {
+public class ParsingException extends RuntimeException {
 
     private final Parameter<?> parameter;
     private final Validator.Failure failure;

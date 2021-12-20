@@ -21,7 +21,7 @@ public interface NumberParser<T extends Number> extends StringParser<T> {
     }
 
     @Override
-    default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException {
+    default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) {
         String string;
         if (data instanceof String) {
             string = (String) data;
