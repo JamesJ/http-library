@@ -15,6 +15,8 @@ import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class VertxHttpRequest implements HttpRequest {
@@ -27,6 +29,8 @@ public class VertxHttpRequest implements HttpRequest {
     private final Map<String, String[]> query;
     private final Map<String, String> pathParams;
     private Body body;
+
+    private Charset charset;
 
     public VertxHttpRequest(Telemetry telemetry, String id, RoutingContext routingContext) {
         this.telemetry = telemetry;
@@ -61,13 +65,15 @@ public class VertxHttpRequest implements HttpRequest {
                 return list.toArray(String[]::new);
             });
         }
+
+        this.charset = StandardCharsets.UTF_8;
     }
 
     @Override
     public void load() throws BodyParsingException {
         if (method().hasBodySupport()) {
             String rawBody = routingContext.getBodyAsString();
-            this.body = BodyReader.read(rawBody, false, MediaType.parse(routingContext.parsedHeaders().contentType().component()));
+            this.body = BodyReader.read(rawBody, false, MediaType.parse(routingContext.parsedHeaders().contentType().component()), charset);
         } else {
             this.body = new EmptyBody();
         }

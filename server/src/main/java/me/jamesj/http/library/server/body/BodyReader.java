@@ -5,7 +5,9 @@ import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.NoBoundaryProvidedException;
 import me.jamesj.http.library.server.body.exceptions.impl.UnknownContentTypeException;
-import me.jamesj.http.library.server.body.impl.*;
+import me.jamesj.http.library.server.body.impl.FormDataBody;
+import me.jamesj.http.library.server.body.impl.JsonBody;
+import me.jamesj.http.library.server.body.impl.MultiPartFormDataBody;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -16,9 +18,9 @@ public interface BodyReader {
     MediaType MULTIPART_FORM_DATA = MediaType.create("multipart", "form-data");
     MediaType MULTIPART_MIXED = MediaType.create("multipart", "mixed");
 
-    Body read(String body, boolean isBase64) throws BodyParsingException;
+    Body read(String body, boolean isBase64, Charset charset) throws BodyParsingException;
 
-    static Body read(String body, boolean isBase64, MediaType mediaType) throws BodyParsingException {
+    static Body read(String body, boolean isBase64, MediaType mediaType, Charset charset) throws BodyParsingException {
         BodyReader reader;
         if (mediaType.is(MediaType.JSON_UTF_8) || mediaType.is(MediaType.MANIFEST_JSON_UTF_8)) {
             reader = new JsonBody.JsonBodyReader();
@@ -32,18 +34,17 @@ public interface BodyReader {
             String boundary = param.get(0);
 
             ImmutableList<String> charsetParams = mediaType.parameters().get("charset");
-            Charset charset;
             if (!charsetParams.isEmpty()) {
                 charset = Charset.forName(charsetParams.get(0));
             } else {
                 charset = StandardCharsets.UTF_8;
             }
 
-            reader = new MultiPartFormDataBody.MultiPartFormDataReader(boundary, charset);
+            reader = new MultiPartFormDataBody.MultiPartFormDataReader(boundary);
         } else {
             throw new UnknownContentTypeException(mediaType);
         }
-        return reader.read(body, isBase64);
+        return reader.read(body, isBase64, charset);
     }
 
 

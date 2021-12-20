@@ -42,15 +42,13 @@ public class MultiPartFormDataBody implements Body {
     public static class MultiPartFormDataReader implements BodyReader {
         
         private final String boundary;
-        private final Charset charset;
         
-        public MultiPartFormDataReader(String boundary, Charset charset) {
+        public MultiPartFormDataReader(String boundary) {
             this.boundary = boundary;
-            this.charset = charset;
         }
         
         @Override
-        public Body read(String body, boolean isBase64) throws BodyParsingException {
+        public Body read(String body, boolean isBase64, Charset charset) throws BodyParsingException {
             if (isBase64) {
                 body = new String(Base64.getDecoder().decode(body), charset);
             }

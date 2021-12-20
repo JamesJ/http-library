@@ -16,6 +16,7 @@ import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -82,7 +83,7 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public void load() throws BodyParsingException {
         if (method().hasBodySupport()) {
-            this.body = BodyReader.read(requestEvent.getBody(), requestEvent.getIsBase64Encoded(), MediaType.parse(contentType));
+            this.body = BodyReader.read(requestEvent.getBody(), requestEvent.getIsBase64Encoded(), MediaType.parse(contentType), StandardCharsets.UTF_8);
         } else {
             this.body = new EmptyBody();
         }

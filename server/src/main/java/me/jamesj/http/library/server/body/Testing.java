@@ -10,6 +10,7 @@ import me.jamesj.http.library.server.parameters.files.File;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class Testing {
@@ -20,7 +21,7 @@ public class Testing {
         String content = "LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1jNDFjZjhlYTdlZmUxNGFkDQpDb250ZW50LURpc3Bvc2l0aW9uOiBmb3JtLWRhdGE7IG5hbWU9Im5hbWUiDQoNCmphbWVzDQotLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLWM0MWNmOGVhN2VmZTE0YWQNCkNvbnRlbnQtRGlzcG9zaXRpb246IGZvcm0tZGF0YTsgbmFtZT0iZmlsZSI7IGZpbGVuYW1lPSJmaWxlLnR4dCINCkNvbnRlbnQtVHlwZTogdGV4dC9wbGFpbg0KDQpoaQoNCi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tYzQxY2Y4ZWE3ZWZlMTRhZC0tDQo=";
 
         try {
-            Body body = BodyReader.read(content, true, mediaType);
+            Body body = BodyReader.read(content, true, mediaType, StandardCharsets.UTF_8);
 
             Source.Result result = body.get("file");
             Parameter<File> file = Parameter.file()

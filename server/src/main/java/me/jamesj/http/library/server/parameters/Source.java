@@ -145,6 +145,9 @@ public interface Source {
         private static Result of(byte[] bytes) {
             return new Result(bytes, Map.of());
         }
+        public static Result of(Object object) {
+            return new Result(object, Map.of());
+        }
 
         public Object getData() {
             return data;
