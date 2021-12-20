@@ -19,6 +19,9 @@ public interface Parameter<T> {
     static Builder<Integer> integer() {
         return new Builder<>(Parser.asInteger());
     }
+    static Builder<Boolean> bool() {
+        return new Builder<>(Parser.asBoolean());
+    }
     static Builder<File> file() {
         return new Builder<>(Parser.asFile());
     }
