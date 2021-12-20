@@ -7,7 +7,7 @@
     <groupId>me.jamesj.http</groupId>
     <artifactId>library</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.1</version>
+    <version>${api-version}</version>
     <modules>
         <module>server</module>
         <module>server-impl-vertx</module>
