@@ -3,6 +3,7 @@ package me.jamesj.http.library.server.parameters.parser;
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Parameter;
+import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.parameters.files.File;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +45,15 @@ public interface Parser<T> {
     @NotNull
     static NumberParser<Byte> asByte() {
         return (parameter, number) -> number.byteValue();
+    }
+
+    static Parser<Map<String, String>> asMap() {
+        return (parameter, data, metadata) -> {
+            if (data instanceof Map) {
+                return (Map<String, String>) data;
+            }
+            throw new ParsingException(parameter, Validator.Failure.of("Cannot parse as map"));
+        };
     }
 
     @NotNull

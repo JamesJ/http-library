@@ -43,7 +43,7 @@ public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRo
         this.parameters.addAll(Arrays.asList(parameter));
     }
 
-    public Collection<HttpFilter> filters() {
+    public List<HttpFilter> filters() {
         return Collections.unmodifiableList(this.filters);
     }
 

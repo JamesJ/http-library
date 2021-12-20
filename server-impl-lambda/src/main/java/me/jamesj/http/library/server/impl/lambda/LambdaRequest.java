@@ -12,6 +12,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,7 @@ import java.util.Map;
 
 public class LambdaRequest implements HttpRequest {
 
+    private final Telemetry telemetry;
     private final APIGatewayV2HTTPEvent requestEvent;
 
     private final Map<String, Object> map;
@@ -33,7 +35,8 @@ public class LambdaRequest implements HttpRequest {
 
     private Body body;
 
-    public LambdaRequest(HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
+    public LambdaRequest(Telemetry telemetry, HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
+        this.telemetry = telemetry;
         this.map = new HashMap<>();
 
         this.requestEvent = requestEvent;
@@ -138,5 +141,10 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public <K> K get(String key) {
         return (K) this.map.get(key);
+    }
+
+    @Override
+    public Telemetry telemetry() {
+        return this.telemetry;
     }
 }

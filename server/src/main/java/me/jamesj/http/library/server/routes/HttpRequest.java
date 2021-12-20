@@ -2,6 +2,7 @@ package me.jamesj.http.library.server.routes;
 
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.parameters.ParameterHolder;
+import me.jamesj.http.library.server.telemetry.Telemetry;
 
 public interface HttpRequest extends ParameterHolder {
 
@@ -23,4 +24,5 @@ public interface HttpRequest extends ParameterHolder {
 
     <K> K get(String key);
 
+    Telemetry telemetry();
 }

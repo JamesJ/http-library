@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public interface Parameter<T> {
 
@@ -20,6 +21,9 @@ public interface Parameter<T> {
     }
     static Builder<File> file() {
         return new Builder<>(Parser.asFile());
+    }
+    static Builder<Map<String, String>> map() {
+        return new Builder<>(Parser.asMap());
     }
 
     List<Validator<T>> validators();
