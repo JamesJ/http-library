@@ -44,4 +44,12 @@
         <maven.compiler.target>${java-version}</maven.compiler.target>
     </properties>
 
+
+    <distributionManagement>
+        <repository>
+            <id>jamesj</id>
+            <url>https://maven.jamesj.me/repository/libraries/</url>
+        </repository>
+    </distributionManagement>
+
 </project>
