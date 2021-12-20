@@ -11,6 +11,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,6 +19,7 @@ import java.util.*;
 
 public class VertxHttpRequest implements HttpRequest {
 
+    private final Telemetry telemetry;
     private final String id;
 
     private final RoutingContext routingContext;
@@ -26,7 +28,8 @@ public class VertxHttpRequest implements HttpRequest {
     private final Map<String, String> pathParams;
     private Body body;
 
-    public VertxHttpRequest(String id, RoutingContext routingContext) {
+    public VertxHttpRequest(Telemetry telemetry, String id, RoutingContext routingContext) {
+        this.telemetry = telemetry;
         this.routingContext = routingContext;
 
         this.id = id;
@@ -138,5 +141,10 @@ public class VertxHttpRequest implements HttpRequest {
     @Override
     public <K> K get(String key) {
         return routingContext.get(key);
+    }
+
+    @Override
+    public Telemetry telemetry() {
+        return this.telemetry;
     }
 }
