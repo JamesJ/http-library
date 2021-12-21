@@ -71,14 +71,14 @@ public class FormDataBody implements Body {
                     key = part.substring(0, key.indexOf("["));
                     value = part.substring(pos + 1);
 
-                    addToMap(key, map, new AbstractMap.SimpleEntry<>(subKey, value));
+                    addToMap(key, map, new AbstractMap.SimpleEntry<>(subKey, value), charset);
                 } else {
                     LoggerFactory.getLogger(FormDataReader.class).info("part={}, length={}, pos={}", part, part.length(), pos);
                     // ordinary value parsing
                     key = part.substring(0, pos);
-                    value = part.substring(pos);
+                    value = part.substring(pos + 1);
 
-                    addToMap(key, map, value);
+                    addToMap(key, map, value, charset);
                 }
 
 
@@ -87,11 +87,11 @@ public class FormDataBody implements Body {
             return new FormDataBody(map);
         }
 
-        private void addToMap(@NotNull String key, @NotNull Map<String, Object> map, @NotNull String value) {
-            map.put(key, value);
+        private void addToMap(@NotNull String key, @NotNull Map<String, Object> map, @NotNull String value, Charset charset) {
+            map.put(key, decode(value, charset));
         }
 
-        private void addToMap(@NotNull String key, @NotNull Map<String, Object> map, @NotNull Map.Entry<String, String> entry) {
+        private void addToMap(@NotNull String key, @NotNull Map<String, Object> map, @NotNull Map.Entry<String, String> entry, Charset charset) {
             Object obj = map.get(key);
             if (!(obj instanceof Map)) {
                 if (obj == null) {
@@ -101,7 +101,7 @@ public class FormDataBody implements Body {
                 }
             }
             Map<String, String> current = (Map<String, String>) obj;
-            current.put(entry.getKey(), entry.getValue());
+            current.put(entry.getKey(), decode(entry.getValue(), charset));
 
             map.put(key, current);
         }
