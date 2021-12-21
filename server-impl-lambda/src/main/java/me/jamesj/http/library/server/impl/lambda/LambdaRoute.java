@@ -37,9 +37,6 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         CompletableFuture<T> completableFuture;
 
         try {
-            if (httpRequest.contentType() == null) {
-                throw new BadRequestException("No Content-Type provided!");
-            }
             httpRequest.load();
         } catch (Exception e) {
             completableFuture = CompletableFuture.failedFuture(e);

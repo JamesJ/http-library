@@ -12,6 +12,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -85,6 +86,9 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public void load() throws BodyParsingException {
         if (method().hasBodySupport()) {
+            if (contentType() == null) {
+                throw new BodyParsingException("No Content-Type provided!");
+            }
             this.body = BodyReader.read(requestEvent.getBody(), requestEvent.getIsBase64Encoded(), MediaType.parse(contentType), StandardCharsets.UTF_8);
         } else {
             this.body = new EmptyBody();
