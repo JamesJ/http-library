@@ -8,13 +8,19 @@ import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class MissingParametersException extends HttpException {
+public class BadRequestException extends HttpException {
 
     private final Map<Parameter<?>, Validator.Failure[]> missing;
 
-    public MissingParametersException(Map<Parameter<?>, Validator.Failure[]> missing) {
+    public BadRequestException(String message) {
+        super(400, "bad_request", message, null);
+        this.missing = new HashMap<>();
+    }
+
+    public BadRequestException(Map<Parameter<?>, Validator.Failure[]> missing) {
         super(400, "bad_request", "Bad request", null);
         this.missing = missing;
     }
@@ -42,7 +48,9 @@ public class MissingParametersException extends HttpException {
             array.add(object);
         }
 
-        jsonObject.add("fields", array);
+        if (array.size() > 0) {
+            jsonObject.add("fields", array);
+        }
     }
 
     private JsonObject toJson(Validator.Failure failure) {

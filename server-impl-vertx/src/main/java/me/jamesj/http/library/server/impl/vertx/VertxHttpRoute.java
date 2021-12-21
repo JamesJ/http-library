@@ -12,7 +12,7 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
-import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
+import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 
 import java.util.List;
 import java.util.Map;
@@ -56,7 +56,7 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
         } catch (BodyParsingException e) {
             completableFuture = CompletableFuture.failedFuture(e);
         } catch (ParsingException e) {
-            completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
+            completableFuture = CompletableFuture.failedFuture(new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         }
 
         try {

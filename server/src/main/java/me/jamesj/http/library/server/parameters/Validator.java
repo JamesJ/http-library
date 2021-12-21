@@ -5,7 +5,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.files.File;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
+import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -229,7 +229,7 @@ public interface Validator<T> {
             if (failureMap.isEmpty()) {
                 return CompletableFuture.completedFuture(null);
             }
-            return CompletableFuture.failedFuture(new MissingParametersException(failureMap));
+            return CompletableFuture.failedFuture(new BadRequestException(failureMap));
         }
     }
 }

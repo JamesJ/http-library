@@ -45,8 +45,8 @@ public class LambdaRequest implements HttpRequest {
         this.method = httpMethod;
         this.id = "req_awsl_" + context.getAwsRequestId();
 
-        this.userAgent = requestEvent.getHeaders().get(HttpHeaders.USER_AGENT);
-        this.contentType = requestEvent.getHeaders().get(HttpHeaders.CONTENT_TYPE);
+        this.userAgent = requestEvent.getHeaders().get("user-agent");
+        this.contentType = requestEvent.getHeaders().get("content-type");
         this.ipAddress = requestEvent.getRequestContext().getHttp().getSourceIp();
         this.path = requestEvent.getRequestContext().getHttp().getPath();
 

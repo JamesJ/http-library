@@ -7,14 +7,13 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.google.common.net.HttpHeaders;
 import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.HttpMethod;
-import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
-import me.jamesj.http.library.server.routes.exceptions.impl.MissingParametersException;
 import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 
@@ -38,8 +37,11 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         CompletableFuture<T> completableFuture;
 
         try {
+            if (httpRequest.contentType() == null) {
+                throw new BadRequestException("No Content-Type provided!");
+            }
             httpRequest.load();
-        } catch (BodyParsingException e) {
+        } catch (Exception e) {
             completableFuture = CompletableFuture.failedFuture(e);
             return handleResult(httpRequest, completableFuture);
         }
@@ -70,7 +72,7 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             telemetry.jinx("Handler start");
             completableFuture = handle(httpRequest);
         } catch (ParsingException e) {
-            completableFuture = CompletableFuture.failedFuture(new MissingParametersException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
+            completableFuture = CompletableFuture.failedFuture(new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         } catch (Throwable throwable) {
             completableFuture = CompletableFuture.failedFuture(throwable);
         } finally {
