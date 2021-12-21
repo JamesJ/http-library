@@ -1,6 +1,6 @@
-package me.jamesj.http.library.server.body;
-
 import com.google.common.net.MediaType;
+import me.jamesj.http.library.server.body.Body;
+import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Parameter;

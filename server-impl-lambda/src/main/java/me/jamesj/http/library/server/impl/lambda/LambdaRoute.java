@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPResponse;
 import com.google.common.net.HttpHeaders;
 import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Validator;
 import me.jamesj.http.library.server.response.HttpResponse;
@@ -34,8 +35,15 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         telemetry.jinx("Request start");
 
         HttpRequest httpRequest = new LambdaRequest(telemetry, method(), event, context);
-
         CompletableFuture<T> completableFuture;
+
+        try {
+            httpRequest.load();
+        } catch (BodyParsingException e) {
+            completableFuture = CompletableFuture.failedFuture(e);
+            return handleResult(httpRequest, completableFuture);
+        }
+
         telemetry.jinx("Iterate filters");
         for (int i = 0; i < filters().size(); i++) {
             HttpFilter filter = filters().get(i);
