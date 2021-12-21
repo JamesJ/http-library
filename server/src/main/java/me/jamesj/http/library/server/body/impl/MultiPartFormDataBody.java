@@ -51,11 +51,7 @@ public class MultiPartFormDataBody implements Body {
         }
 
         @Override
-        public Body read(String body, boolean isBase64, Charset charset) throws BodyParsingException {
-            if (isBase64) {
-                body = new String(Base64.getDecoder().decode(body), charset);
-            }
-
+        public Body read(String body, Charset charset) throws BodyParsingException {
             Map<String, FormContext> map = new HashMap<>();
 
             MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(body.getBytes(charset)), this.boundary.getBytes(charset));

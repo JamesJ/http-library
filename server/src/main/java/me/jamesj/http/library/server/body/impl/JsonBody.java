@@ -54,10 +54,7 @@ public class JsonBody implements Body {
         public static Gson GSON = new GsonBuilder().create();
 
         @Override
-        public Body read(String body, boolean isBase64, Charset charset) throws BodyParsingException {
-            if (isBase64) {
-                body = new String(Base64.getDecoder().decode(body));
-            }
+        public Body read(String body, Charset charset) throws BodyParsingException {
             JsonObject jsonObject = GSON.fromJson(body, JsonObject.class);
             return new JsonBody(jsonObject);
         }

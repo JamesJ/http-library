@@ -2,8 +2,8 @@ package me.jamesj.http.library.server.impl.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
-import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
+import com.google.gson.Gson;
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
@@ -15,6 +15,7 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class LambdaRequest implements HttpRequest {
     private Body body;
 
     public LambdaRequest(Telemetry telemetry, HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
+        LoggerFactory.getLogger(LambdaRequest.class).info("requestEvent={}", new Gson().toJson(requestEvent));
         this.telemetry = telemetry;
         this.map = new HashMap<>();
 

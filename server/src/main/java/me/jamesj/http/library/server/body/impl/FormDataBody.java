@@ -5,6 +5,7 @@ import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.parameters.Source;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -35,17 +36,22 @@ public class FormDataBody implements Body {
     public static class FormDataReader implements BodyReader {
 
         @Override
-        public Body read(String body, boolean isBase64, Charset charset) throws BodyParsingException {
-            if (isBase64) {
-                body = Arrays.toString(Base64.getDecoder().decode(body));
-            }
+        public Body read(String body, Charset charset) throws BodyParsingException {
+            LoggerFactory.getLogger(FormDataReader.class).info("Body={}", body);
             String[] parts = body.split("&");
 
             Map<String, Object> map = new HashMap<>();
 
-
             for (String part : parts) {
+                if (part.length() == 0) {
+                    continue;
+                }
                 int pos = part.indexOf("=");
+
+                if (pos == -1) {
+                    // strict no value handling
+                    continue;
+                }
 
                 String key, value;
 
@@ -67,9 +73,10 @@ public class FormDataBody implements Body {
 
                     addToMap(key, map, new AbstractMap.SimpleEntry<>(subKey, value));
                 } else {
+                    LoggerFactory.getLogger(FormDataReader.class).info("part={}, length={}, pos={}", part, part.length(), pos);
                     // ordinary value parsing
                     key = part.substring(0, pos);
-                    value = part.substring(pos + 1);
+                    value = part.substring(pos);
 
                     addToMap(key, map, value);
                 }
