@@ -20,11 +20,11 @@ import java.util.stream.Collectors;
 public interface Validator<T> {
     
     static <T> Validator<T> min(int length) {
-        return new MinimumLengthValidator(length);
+        return new MinimumLengthValidator<>(length);
     }
     
     static <T> Validator<T> max(int length) {
-        return new MaximumLengthValidator(length);
+        return new MaximumLengthValidator<>(length);
     }
     
     static Validator<File> type(MediaType... types) {
@@ -38,7 +38,7 @@ public interface Validator<T> {
     @Nullable
     Failure test(@Nullable T t);
     
-    class MinimumLengthValidator implements Validator {
+    class MinimumLengthValidator<T> implements Validator<T> {
         
         private final int value;
         private final String failureMessage;
@@ -83,7 +83,7 @@ public interface Validator<T> {
         }
     }
     
-    class MaximumLengthValidator implements Validator {
+    class MaximumLengthValidator<T> implements Validator<T> {
         
         private final int value;
         private final String failureMessage;
