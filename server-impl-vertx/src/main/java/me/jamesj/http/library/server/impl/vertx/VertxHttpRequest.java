@@ -38,9 +38,9 @@ public class VertxHttpRequest implements HttpRequest {
 
         this.id = id;
 
-        this.headers = new LinkedHashMap<>();
-        this.query = new LinkedHashMap<>();
-        this.pathParams = routingContext.pathParams();
+        this.headers = new HashMap<>();
+        this.query = new HashMap<>();
+        this.pathParams = new HashMap<>(routingContext.pathParams());
 
         for (Map.Entry<String, String> header : routingContext.request().headers()) {
             this.headers.compute(header.getKey().toLowerCase(), (s, strings) -> {
