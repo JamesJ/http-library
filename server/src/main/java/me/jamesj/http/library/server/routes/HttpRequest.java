@@ -23,6 +23,4 @@ public interface HttpRequest extends ParameterHolder {
     boolean contains(String key);
 
     <K> K get(String key);
-
-    Telemetry telemetry();
 }
