@@ -37,7 +37,6 @@ public class FormDataBody implements Body {
 
         @Override
         public Body read(String body, Charset charset) throws BodyParsingException {
-            LoggerFactory.getLogger(FormDataReader.class).info("Body={}", body);
             String[] parts = body.split("&");
 
             Map<String, Object> map = new HashMap<>();
