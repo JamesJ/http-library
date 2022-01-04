@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.Xray;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
@@ -32,10 +33,14 @@ public class LambdaRequest implements HttpRequest {
     private final Map<String, String[]> headers, query;
     private final Map<String, String> pathParams;
 
+    private final Xray xray;
+
     private Body body;
 
     public LambdaRequest(HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
         this.map = new HashMap<>();
+
+        this.xray = new AwsXray();
 
         this.requestEvent = requestEvent;
         this.context = context;
@@ -143,6 +148,11 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public <K> K get(String key) {
         return (K) this.map.get(key);
+    }
+
+    @Override
+    public Xray xray() {
+        return this.xray;
     }
 
     public Context getContext() {

@@ -4,6 +4,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.Xray;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
@@ -146,4 +147,8 @@ public class VertxHttpRequest implements HttpRequest {
         return routingContext.get(key);
     }
 
+    @Override
+    public Xray xray() {
+        return null;
+    }
 }

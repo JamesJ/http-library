@@ -1,6 +1,7 @@
 package me.jamesj.http.library.server.routes;
 
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.Xray;
 import me.jamesj.http.library.server.parameters.ParameterHolder;
 
 public interface HttpRequest extends ParameterHolder {
@@ -22,4 +23,6 @@ public interface HttpRequest extends ParameterHolder {
     boolean contains(String key);
 
     <K> K get(String key);
+
+    Xray xray();
 }
