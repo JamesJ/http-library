@@ -85,6 +85,7 @@ public class LambdaRequest implements HttpRequest {
 
     @Override
     public void load() throws BodyParsingException {
+        xray.startSegment("body_init");
         if (method().hasBodySupport()) {
             if (contentType() == null) {
                 throw new BodyParsingException("No Content-Type provided!");
@@ -93,6 +94,7 @@ public class LambdaRequest implements HttpRequest {
         } else {
             this.body = new EmptyBody();
         }
+        xray.endSegment();
     }
 
     @Override

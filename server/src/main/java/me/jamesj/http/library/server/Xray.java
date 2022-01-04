@@ -4,6 +4,6 @@ public interface Xray {
 
     void startSegment(String name);
 
-    void endSegment(String name);
+    void endSegment();
 
 }

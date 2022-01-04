@@ -40,9 +40,11 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             return handleResult(httpRequest, completableFuture);
         }
 
+        httpRequest.xray().startSegment("filter_init");
         for (int i = 0; i < filters().size(); i++) {
             HttpFilter filter = filters().get(i);
             try {
+                httpRequest.xray().startSegment("filter_" + filter.getClass().getName());
                 filter.filter(httpRequest).join();
             } catch (CompletionException completionException) {
                 completableFuture = CompletableFuture.failedFuture(completionException.getCause());
@@ -52,16 +54,22 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
                 completableFuture = CompletableFuture.failedFuture(throwable);
                 // return here just to make sure there's no chance of invoking the handler
                 return handleResult(httpRequest, completableFuture);
+            } finally {
+                httpRequest.xray().endSegment();
             }
         }
+        httpRequest.xray().endSegment();
 
 
+        httpRequest.xray().startSegment("handle");
         try {
             completableFuture = handle(httpRequest);
         } catch (ParsingException e) {
             completableFuture = CompletableFuture.failedFuture(new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         } catch (Throwable throwable) {
             completableFuture = CompletableFuture.failedFuture(throwable);
+        } finally {
+            httpRequest.xray().endSegment();
         }
 
         return handleResult(httpRequest, completableFuture);
