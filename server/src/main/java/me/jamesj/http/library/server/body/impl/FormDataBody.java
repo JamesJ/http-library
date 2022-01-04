@@ -73,7 +73,6 @@ public class FormDataBody implements Body {
 
                     addToMap(key, map, new AbstractMap.SimpleEntry<>(subKey, value), charset);
                 } else {
-                    LoggerFactory.getLogger(FormDataReader.class).info("part={}, length={}, pos={}", part, part.length(), pos);
                     // ordinary value parsing
                     key = part.substring(0, pos);
                     value = part.substring(pos + 1);
