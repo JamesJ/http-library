@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.HttpMethod;
-import me.jamesj.http.library.server.Xray;
+import me.jamesj.http.library.server.xray.Xray;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;

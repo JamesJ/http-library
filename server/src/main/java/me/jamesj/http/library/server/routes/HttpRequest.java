@@ -1,7 +1,7 @@
 package me.jamesj.http.library.server.routes;
 
 import me.jamesj.http.library.server.HttpMethod;
-import me.jamesj.http.library.server.Xray;
+import me.jamesj.http.library.server.xray.Xray;
 import me.jamesj.http.library.server.parameters.ParameterHolder;
 
 public interface HttpRequest extends ParameterHolder {

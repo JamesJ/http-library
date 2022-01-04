@@ -1,24 +1,34 @@
 package me.jamesj.http.library.server.impl.lambda;
 
-import com.amazonaws.xray.AWSXRayRecorder;
-import com.amazonaws.xray.AWSXRayRecorderBuilder;
-import me.jamesj.http.library.server.Xray;
+import com.amazonaws.xray.AWSXRay;
+import com.amazonaws.xray.entities.Subsegment;
+import me.jamesj.http.library.server.xray.Segment;
+import me.jamesj.http.library.server.xray.Xray;
 
 public class AwsXray implements Xray {
 
-    private final AWSXRayRecorder recorder;
-
-    public AwsXray() {
-        recorder = AWSXRayRecorderBuilder.defaultRecorder();
-    }
-
     @Override
-    public void startSegment(String name) {
-        recorder.beginSegment(name);
+    public AwsXraySegment startSegment(String name) {
+        Subsegment subsegment = AWSXRay.beginSubsegment(name);
+        return new AwsXraySegment(subsegment);
     }
 
     @Override
     public void endSegment() {
-        recorder.endSegment();
+        AWSXRay.endSubsegment();
+    }
+
+    public static class AwsXraySegment implements Segment {
+
+        private final Subsegment subsegment;
+
+        AwsXraySegment(Subsegment subsegment) {
+            this.subsegment = subsegment;
+        }
+
+        @Override
+        public void addException(Throwable throwable) {
+            subsegment.addException(throwable);
+        }
     }
 }
