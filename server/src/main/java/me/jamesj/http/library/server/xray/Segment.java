@@ -4,4 +4,6 @@ public interface Segment {
 
     void addException(Throwable throwable);
 
+    void end();
+
 }

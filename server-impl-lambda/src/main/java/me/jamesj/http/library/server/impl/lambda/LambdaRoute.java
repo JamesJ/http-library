@@ -14,6 +14,7 @@ import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
+import me.jamesj.http.library.server.xray.Segment;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -29,39 +30,39 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
 
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
-
         HttpRequest httpRequest = new LambdaRequest(method(), event, context);
+        Segment requestSegment = httpRequest.xray().startSegment("Request Processing");
         CompletableFuture<T> completableFuture;
 
         try {
             httpRequest.load();
         } catch (Exception e) {
             completableFuture = CompletableFuture.failedFuture(e);
-            return handleResult(httpRequest, completableFuture);
+            return handleResult(httpRequest, completableFuture, requestSegment);
         }
 
-        httpRequest.xray().startSegment("filter_init");
+        Segment filtersSegment = httpRequest.xray().startSegment("Filters");
         for (int i = 0; i < filters().size(); i++) {
             HttpFilter filter = filters().get(i);
+            Segment segment = httpRequest.xray().startSegment("Filter " + filter.getClass().getName());
             try {
-                httpRequest.xray().startSegment("filter_" + filter.getClass().getName());
                 filter.filter(httpRequest).join();
             } catch (CompletionException completionException) {
                 completableFuture = CompletableFuture.failedFuture(completionException.getCause());
                 // return here just to make sure there's no chance of invoking the handler
-                return handleResult(httpRequest, completableFuture);
+                return handleResult(httpRequest, completableFuture, requestSegment);
             } catch (Throwable throwable) {
                 completableFuture = CompletableFuture.failedFuture(throwable);
                 // return here just to make sure there's no chance of invoking the handler
-                return handleResult(httpRequest, completableFuture);
+                return handleResult(httpRequest, completableFuture, requestSegment);
             } finally {
-                httpRequest.xray().endSegment();
+                segment.end();
             }
         }
-        httpRequest.xray().endSegment();
+        filtersSegment.end();
 
 
-        httpRequest.xray().startSegment("handle");
+        Segment handle = httpRequest.xray().startSegment("Handle");
         try {
             completableFuture = handle(httpRequest);
         } catch (ParsingException e) {
@@ -69,14 +70,14 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         } catch (Throwable throwable) {
             completableFuture = CompletableFuture.failedFuture(throwable);
         } finally {
-            httpRequest.xray().endSegment();
+            handle.end();
         }
 
-        return handleResult(httpRequest, completableFuture);
+        return handleResult(httpRequest, completableFuture, requestSegment);
     }
 
 
-    private APIGatewayV2HTTPResponse handleResult(HttpRequest httpRequest, CompletableFuture<T> completableFuture) {
+    private APIGatewayV2HTTPResponse handleResult(HttpRequest httpRequest, CompletableFuture<T> completableFuture, Segment requestSegment) {
         HttpResponse<?> response;
         try {
             response = completableFuture.join();
@@ -91,13 +92,14 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             if (throwable instanceof HttpResponse) {
                 response = (HttpResponse<?>) throwable;
             } else {
-                throwable.printStackTrace();
-
+                requestSegment.addException(throwable);
                 InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
                 getLogger().error("Caught exception (ID: {}) in request {}", internalHttpServerException.getId(), httpRequest.requestId(), throwable);
 
                 response = internalHttpServerException;
             }
+        } finally {
+            requestSegment.end();
         }
 
         return APIGatewayV2HTTPResponse.builder()

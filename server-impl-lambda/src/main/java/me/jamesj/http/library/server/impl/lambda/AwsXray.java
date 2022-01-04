@@ -10,6 +10,7 @@ public class AwsXray implements Xray {
     @Override
     public AwsXraySegment startSegment(String name) {
         Subsegment subsegment = AWSXRay.beginSubsegment(name);
+
         return new AwsXraySegment(subsegment);
     }
 
@@ -29,6 +30,11 @@ public class AwsXray implements Xray {
         @Override
         public void addException(Throwable throwable) {
             subsegment.addException(throwable);
+        }
+
+        @Override
+        public void end() {
+            this.subsegment.end();
         }
     }
 }

@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.net.MediaType;
 import me.jamesj.http.library.server.HttpMethod;
+import me.jamesj.http.library.server.xray.Segment;
 import me.jamesj.http.library.server.xray.Xray;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
@@ -65,7 +66,7 @@ public class LambdaRequest implements HttpRequest {
             this.requestEvent.getQueryStringParameters().forEach((s, s2) -> this.query.put(s, new String[]{s2}));
         }
 
-        this.pathParams = requestEvent.getPathParameters();
+        this.pathParams = new HashMap<>(requestEvent.getPathParameters());
     }
 
     @Override
@@ -85,7 +86,7 @@ public class LambdaRequest implements HttpRequest {
 
     @Override
     public void load() throws BodyParsingException {
-        xray.startSegment("body_init");
+        Segment segment = xray.startSegment("Body Loading");
         if (method().hasBodySupport()) {
             if (contentType() == null) {
                 throw new BodyParsingException("No Content-Type provided!");
@@ -94,7 +95,7 @@ public class LambdaRequest implements HttpRequest {
         } else {
             this.body = new EmptyBody();
         }
-        xray.endSegment();
+        segment.end();
     }
 
     @Override
