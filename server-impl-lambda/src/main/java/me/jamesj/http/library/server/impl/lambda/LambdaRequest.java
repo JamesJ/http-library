@@ -3,7 +3,6 @@ package me.jamesj.http.library.server.impl.lambda;
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayV2HTTPEvent;
 import com.google.common.net.MediaType;
-import com.google.gson.Gson;
 import me.jamesj.http.library.server.HttpMethod;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
@@ -12,11 +11,8 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
-import me.jamesj.http.library.server.telemetry.Telemetry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -25,8 +21,8 @@ import java.util.Map;
 
 public class LambdaRequest implements HttpRequest {
 
-    private final Telemetry telemetry;
     private final APIGatewayV2HTTPEvent requestEvent;
+    private final Context context;
 
     private final Map<String, Object> map;
 
@@ -38,12 +34,11 @@ public class LambdaRequest implements HttpRequest {
 
     private Body body;
 
-    public LambdaRequest(Telemetry telemetry, HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
-        LoggerFactory.getLogger(LambdaRequest.class).info("requestEvent={}", new Gson().toJson(requestEvent));
-        this.telemetry = telemetry;
+    public LambdaRequest(HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
         this.map = new HashMap<>();
 
         this.requestEvent = requestEvent;
+        this.context = context;
 
         this.method = httpMethod;
         this.id = "req_awsl_" + context.getAwsRequestId();
@@ -150,8 +145,11 @@ public class LambdaRequest implements HttpRequest {
         return (K) this.map.get(key);
     }
 
-    @Override
-    public Telemetry telemetry() {
-        return this.telemetry;
+    public Context getContext() {
+        return context;
+    }
+
+    public APIGatewayV2HTTPEvent getRequestEvent() {
+        return requestEvent;
     }
 }

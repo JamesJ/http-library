@@ -11,8 +11,8 @@ import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
-import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
 import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
+import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
 
 import java.util.List;
 import java.util.Map;
@@ -37,7 +37,7 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
     @Override
     public void handle(RoutingContext routingContext) {
         CompletableFuture<T> completableFuture = null;
-        HttpRequest httpRequest = new VertxHttpRequest(null /*todo*/, server.configuration().getRequestIdGenerator().get(), routingContext);
+        HttpRequest httpRequest = new VertxHttpRequest(server.configuration().getRequestIdGenerator().get(), routingContext);
         try {
             httpRequest.load();
 
