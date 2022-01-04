@@ -54,13 +54,13 @@ public class LambdaRequest implements HttpRequest {
         this.ipAddress = requestEvent.getRequestContext().getHttp().getSourceIp();
         this.path = requestEvent.getRequestContext().getHttp().getPath();
 
-        this.headers = new LinkedHashMap<>();
+        this.headers = new HashMap<>();
         Map<String, String> awsHeaders = this.requestEvent.getHeaders();
         if (awsHeaders != null) {
             this.requestEvent.getHeaders().forEach((s, s2) -> this.headers.put(s.toLowerCase(), new String[]{s2}));
         }
 
-        this.query = new LinkedHashMap<>();
+        this.query = new HashMap<>();
         Map<String, String> awsQueryParams = this.requestEvent.getQueryStringParameters();
         if (awsQueryParams != null) {
             this.requestEvent.getQueryStringParameters().forEach((s, s2) -> this.query.put(s, new String[]{s2}));
