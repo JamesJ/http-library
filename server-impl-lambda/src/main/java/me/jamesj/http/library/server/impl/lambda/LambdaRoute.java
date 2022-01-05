@@ -30,6 +30,8 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
 
     @Override
     public APIGatewayV2HTTPResponse handleRequest(APIGatewayV2HTTPEvent event, Context context) {
+        getLogger().info("event={}", event);
+        getLogger().info("context={}", context);
         HttpRequest httpRequest = new LambdaRequest(method(), event, context);
         Segment requestSegment = httpRequest.xray().startSegment("Request Processing");
         CompletableFuture<T> completableFuture;

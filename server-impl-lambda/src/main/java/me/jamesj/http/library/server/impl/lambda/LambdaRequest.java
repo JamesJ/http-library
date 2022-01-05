@@ -49,11 +49,6 @@ public class LambdaRequest implements HttpRequest {
         this.method = httpMethod;
         this.id = "req_awsl_" + context.getAwsRequestId();
 
-        this.userAgent = requestEvent.getHeaders().get("user-agent");
-        this.contentType = requestEvent.getHeaders().get("content-type");
-        this.ipAddress = requestEvent.getRequestContext().getHttp().getSourceIp();
-        this.path = requestEvent.getRequestContext().getHttp().getPath();
-
         this.headers = new HashMap<>();
         Map<String, String> awsHeaders = this.requestEvent.getHeaders();
         if (awsHeaders != null) {
@@ -70,6 +65,18 @@ public class LambdaRequest implements HttpRequest {
         if (requestEvent.getPathParameters() != null) {
             this.pathParams.putAll(requestEvent.getPathParameters());
         }
+
+        this.userAgent = first(headers.get("user-agent"));
+        this.contentType = first(headers.get("content-type"));
+        this.ipAddress = requestEvent.getRequestContext().getHttp().getSourceIp();
+        this.path = requestEvent.getRequestContext().getHttp().getPath();
+    }
+
+    private String first(String[] headers) {
+        if (headers == null || headers.length == 0) {
+            return null;
+        }
+        return headers[0];
     }
 
     @Override

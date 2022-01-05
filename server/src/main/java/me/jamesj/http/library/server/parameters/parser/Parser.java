@@ -110,6 +110,7 @@ public interface Parser<T> {
                 string = data.toString();
             }
 
+
             if (NumberUtils.isCreatable(string)) {
                 return parse(parameter, string);
             }
