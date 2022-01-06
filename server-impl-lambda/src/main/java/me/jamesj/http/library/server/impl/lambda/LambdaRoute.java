@@ -26,6 +26,7 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
 
     public LambdaRoute(@NotNull String path, @NotNull HttpMethod method) {
         super(path, method);
+        getLogger().debug("Invoking constructor for class {}", getClass());
     }
 
     @Override
@@ -36,6 +37,7 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         Segment requestSegment = httpRequest.xray().startSegment("Request Processing");
         CompletableFuture<T> completableFuture;
 
+        getLogger().debug("Loading body");
         try {
             httpRequest.load();
         } catch (Exception e) {
@@ -43,9 +45,11 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
             return handleResult(httpRequest, completableFuture, requestSegment);
         }
 
+        getLogger().debug("Processing filters");
         Segment filtersSegment = httpRequest.xray().startSegment("Filters");
         for (int i = 0; i < filters().size(); i++) {
             HttpFilter filter = filters().get(i);
+            getLogger().debug("Processing filter {}", filter.getClass());
             Segment segment = httpRequest.xray().startSegment("Filter " + filter.getClass().getName());
             try {
                 filter.filter(httpRequest).join();
@@ -58,12 +62,14 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
                 // return here just to make sure there's no chance of invoking the handler
                 return handleResult(httpRequest, completableFuture, requestSegment);
             } finally {
+                getLogger().debug("Finished processing filter {}", filter.getClass());
                 segment.end();
             }
         }
         filtersSegment.end();
 
 
+        getLogger().debug("Invoking #handle");
         Segment handle = httpRequest.xray().startSegment("Handle");
         try {
             completableFuture = handle(httpRequest);
@@ -72,6 +78,7 @@ public abstract class LambdaRoute<T extends HttpResponse<?>> extends AbstractRou
         } catch (Throwable throwable) {
             completableFuture = CompletableFuture.failedFuture(throwable);
         } finally {
+            getLogger().debug("Finished invoking #handle");
             handle.end();
         }
 

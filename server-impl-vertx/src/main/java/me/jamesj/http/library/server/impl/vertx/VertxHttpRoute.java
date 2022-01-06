@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @SuppressWarnings("UnstableApiUsage")
-public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<RoutingContext> {
+public class VertxHttpRoute<T> implements Handler<RoutingContext> {
     private final VertxHttpServer server;
     private final HttpRoute<T> httpRoute;
     private final List<HttpFilter> filters;
@@ -60,10 +60,9 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
         }
 
         try {
-
             handle(httpRequest, completableFuture, routingContext);
         } catch (Throwable throwable) {
-            completableFuture = CompletableFuture.failedFuture(throwable);
+            handle(httpRequest, CompletableFuture.failedFuture(throwable), routingContext);
         }
     }
 
@@ -79,7 +78,7 @@ public class VertxHttpRoute<K, T extends HttpResponse<K>> implements Handler<Rou
                     httpResponse = internalHttpServerException;
                 }
             } else {
-                httpResponse = t;
+                httpResponse = (HttpResponse<?>) t;
             }
             context.response().putHeader(HttpHeaders.CONTENT_TYPE, httpResponse.getMediaType().toString());
             context.response().write(httpResponse.build(httpRequest).toString());
