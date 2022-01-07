@@ -4,7 +4,6 @@ import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.HttpMethod;
-import me.jamesj.http.library.server.xray.Xray;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
@@ -12,6 +11,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
+import me.jamesj.http.library.server.xray.Xray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,6 +33,7 @@ public class VertxHttpRequest implements HttpRequest {
 
     public VertxHttpRequest(String id, RoutingContext routingContext) {
         this.routingContext = routingContext;
+        this.routingContext.put("_id", id);
 
         this.id = id;
 

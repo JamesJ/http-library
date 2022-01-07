@@ -11,6 +11,6 @@ public interface HttpServer {
 
     HttpConfiguration configuration();
 
-    <K, T extends HttpResponse<K>> void register(HttpRoute<T> route, HttpFilter... filters);
+    <T extends HttpResponse> void register(HttpRoute<T> route, HttpFilter... filters);
 
 }

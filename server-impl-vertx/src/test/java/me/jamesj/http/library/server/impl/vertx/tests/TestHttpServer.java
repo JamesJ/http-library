@@ -5,6 +5,7 @@ import me.jamesj.http.library.server.HttpServer;
 import me.jamesj.http.library.server.impl.vertx.VertxHttpServer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by James on 10/12/2021

@@ -13,6 +13,7 @@ import me.jamesj.http.library.server.routes.HttpRoute;
 import me.jamesj.http.library.server.routes.exceptions.HttpException;
 import me.jamesj.http.library.server.routes.exceptions.impl.BadRequestException;
 import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Map;
@@ -23,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
  */
 
 @SuppressWarnings("UnstableApiUsage")
-public class VertxHttpRoute<T> implements Handler<RoutingContext> {
+public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingContext> {
     private final VertxHttpServer server;
     private final HttpRoute<T> httpRoute;
     private final List<HttpFilter> filters;
@@ -34,10 +35,14 @@ public class VertxHttpRoute<T> implements Handler<RoutingContext> {
         this.filters = filters;
     }
 
+    public HttpRequest buildHttpRequest(RoutingContext routingContext) {
+        return new VertxHttpRequest(server.configuration().getRequestIdGenerator().get(), routingContext);
+    }
+
     @Override
     public void handle(RoutingContext routingContext) {
         CompletableFuture<T> completableFuture = null;
-        HttpRequest httpRequest = new VertxHttpRequest(server.configuration().getRequestIdGenerator().get(), routingContext);
+        HttpRequest httpRequest = buildHttpRequest(routingContext);
         try {
             httpRequest.load();
 
@@ -59,30 +64,33 @@ public class VertxHttpRoute<T> implements Handler<RoutingContext> {
             completableFuture = CompletableFuture.failedFuture(new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()})));
         }
 
-        try {
-            handle(httpRequest, completableFuture, routingContext);
-        } catch (Throwable throwable) {
-            handle(httpRequest, CompletableFuture.failedFuture(throwable), routingContext);
-        }
+        handle(httpRoute.getLogger(), httpRequest, completableFuture, routingContext);
     }
 
-    public void handle(HttpRequest httpRequest, CompletableFuture<T> completableFuture, RoutingContext context) {
+    protected static <T extends HttpResponse> void handle(Logger logger, HttpRequest httpRequest, CompletableFuture<T> completableFuture, RoutingContext context) {
         completableFuture.whenComplete((t, throwable) -> {
             HttpResponse<?> httpResponse;
             if (throwable != null) {
+                if (throwable.getCause() != null) {
+                    throwable = throwable.getCause();
+                }
                 if (throwable instanceof HttpException) {
                     httpResponse = (HttpException) throwable;
                 } else {
                     InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
-                    httpRoute.getLogger().error("Caught exception " + throwable + " (ID: " + internalHttpServerException.getId() + ") in request " + httpRequest.requestId());
+                    logger.error("Caught exception (ID: " + internalHttpServerException.getId() + ") in request " + httpRequest.requestId(), throwable);
                     httpResponse = internalHttpServerException;
                 }
             } else {
                 httpResponse = (HttpResponse<?>) t;
             }
             context.response().putHeader(HttpHeaders.CONTENT_TYPE, httpResponse.getMediaType().toString());
-            context.response().write(httpResponse.build(httpRequest).toString());
-            context.next();
+            context.response().setStatusCode(httpResponse.getStatusCode());
+            context.response().end(httpResponse.build(httpRequest).toString());
+        }).whenComplete((t, throwable) -> {
+            long time = System.currentTimeMillis() - (long) context.get("start");
+            logger.info("Handled request ({}) from {} in {}ms (status: {}, written: {})",
+                    httpRequest.requestId(), httpRequest.ipAddress(), time, context.response().getStatusCode(), context.response().bytesWritten());
         });
     }
 }

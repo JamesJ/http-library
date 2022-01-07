@@ -2,8 +2,8 @@ package me.jamesj.http.library.server.impl.vertx;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 import me.jamesj.http.library.server.HttpConfiguration;
 import me.jamesj.http.library.server.HttpMethod;
@@ -12,12 +12,12 @@ import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.routes.HttpRoute;
-import me.jamesj.http.library.server.routes.exceptions.HttpException;
-import me.jamesj.http.library.server.routes.exceptions.impl.InternalHttpServerException;
+import me.jamesj.http.library.server.routes.exceptions.impl.RouteNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 public class VertxHttpServer implements HttpServer {
 
@@ -25,13 +25,46 @@ public class VertxHttpServer implements HttpServer {
     private final HttpConfiguration configuration;
     private final Router router;
 
+    private final io.vertx.core.http.HttpServer httpServer;
+
     public VertxHttpServer(HttpConfiguration configuration) {
         this.configuration = configuration;
         this.logger = LoggerFactory.getLogger(getClass());
         this.router = Router.router(Vertx.vertx());
 
-        Vertx.vertx().createHttpServer(new HttpServerOptions()
+        this.router.route().blockingHandler(routingContext -> {
+            routingContext.put("start", System.currentTimeMillis());
+            routingContext.next();
+        });
+
+        this.httpServer = Vertx.vertx().createHttpServer(new HttpServerOptions()
                 .setPort(configuration.getPort()));
+    }
+
+    class UnknownRoute {
+
+    }
+
+    public void start() {
+        Logger unknownRouteLogger = LoggerFactory.getLogger(UnknownRoute.class);
+        router.route().handler(routingContext -> {
+            String id = routingContext.get("_id");
+            if (id == null) {
+                id = configuration.getRequestIdGenerator().get();
+            }
+            VertxHttpRequest vertxHttpRequest = new VertxHttpRequest(id, routingContext);
+            VertxHttpRoute.handle(unknownRouteLogger, vertxHttpRequest, CompletableFuture.failedFuture(new RouteNotFoundException()), routingContext);
+        });
+
+
+        httpServer.requestHandler(router)
+                .listen(httpServerAsyncResult -> {
+                    if (httpServerAsyncResult.failed()) {
+                        getLogger().info("Failed to start http server on port {}", configuration.getPort(), httpServerAsyncResult.cause());
+                    } else {
+                        getLogger().info("Started http server on port {}", httpServerAsyncResult.result().actualPort());
+                    }
+                });
     }
 
     @Override
@@ -45,15 +78,25 @@ public class VertxHttpServer implements HttpServer {
     }
 
     @Override
-    public <K, T extends HttpResponse<K>> void register(HttpRoute<T> route, HttpFilter... filters) {
-        io.vertx.core.http.HttpMethod method = toVertxHttpMethod(route.method());
-        String path = route.path();
+    public <T extends HttpResponse> void register(HttpRoute<T> httpRoute, HttpFilter... filters) {
+        io.vertx.core.http.HttpMethod method = toVertxHttpMethod(httpRoute.method());
+        String path = httpRoute.path();
 
-        if (route.method().hasBodySupport()) {
-            router.route(method, path).blockingHandler(BodyHandler.create(false));
+        VertxHttpRoute<T> vertxHttpRoute = new VertxHttpRoute<>(this, httpRoute, Arrays.asList(filters));
+
+        Route route = router.route(method, path);
+
+        if (httpRoute.method().hasBodySupport()) {
+            route.blockingHandler(BodyHandler.create(false));
         }
+        route.blockingHandler(vertxHttpRoute);
 
-        router.route(method, path).handler(new VertxHttpRoute<>(this, route, Arrays.asList(filters)));
+        route.failureHandler(routingContext -> {
+            String id = routingContext.get("id");
+            HttpRequest httpRequest = new VertxHttpRequest(id, routingContext);
+
+            VertxHttpRoute.handle(getLogger(), httpRequest, CompletableFuture.failedFuture(routingContext.failure()), routingContext);
+        });
 
     }
 
@@ -61,17 +104,4 @@ public class VertxHttpServer implements HttpServer {
         return io.vertx.core.http.HttpMethod.valueOf(method.name());
     }
 
-    protected void handleException(Logger logger, HttpRequest httpRequest, RoutingContext routingContext, Throwable throwable) {
-        HttpResponse<?> httpResponse;
-        if (throwable instanceof HttpException) {
-            httpResponse = ((HttpException) throwable);
-        } else {
-            InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
-            httpResponse = internalHttpServerException;
-            logger.error("Caught error (id: {}) whilst executing request {} from {}", internalHttpServerException.getId(), httpRequest.requestId(), httpRequest.ipAddress(), internalHttpServerException);
-        }
-
-        routingContext.response().setStatusCode(httpResponse.getStatusCode());
-        routingContext.response().write(httpResponse.build(httpRequest).toString());
-    }
 }
