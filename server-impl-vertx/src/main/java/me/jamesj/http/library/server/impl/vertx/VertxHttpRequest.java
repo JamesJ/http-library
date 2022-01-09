@@ -1,6 +1,5 @@
 package me.jamesj.http.library.server.impl.vertx;
 
-import com.google.common.net.HttpHeaders;
 import com.google.common.net.MediaType;
 import io.vertx.ext.web.RoutingContext;
 import me.jamesj.http.library.server.HttpMethod;
@@ -14,6 +13,8 @@ import me.jamesj.http.library.server.routes.HttpRequest;
 import me.jamesj.http.library.server.xray.Xray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -29,11 +30,15 @@ public class VertxHttpRequest implements HttpRequest {
     private final Map<String, String> pathParams;
     private Body body;
 
-    private Charset charset;
+    private final String userAgent, contentType;
+
+    private final HttpMethod method;
+    private final Charset charset;
 
     public VertxHttpRequest(String id, RoutingContext routingContext) {
         this.routingContext = routingContext;
         this.routingContext.put("_id", id);
+        this.method = HttpMethod.valueOf(routingContext.request().method().name().toUpperCase());
 
         this.id = id;
 
@@ -47,7 +52,7 @@ public class VertxHttpRequest implements HttpRequest {
                     strings = new String[0];
                 }
                 List<String> list = new ArrayList<>(Arrays.asList(strings));
-                list.add(s);
+                list.add(header.getValue());
 
                 return list.toArray(String[]::new);
             });
@@ -66,13 +71,24 @@ public class VertxHttpRequest implements HttpRequest {
         }
 
         this.charset = StandardCharsets.UTF_8;
+        this.userAgent = first(this.headers.get("user-agent"));
+        this.contentType = first(this.headers.get("content-type"));
+    }
+
+    private String first(String[] headers) {
+        if (headers == null || headers.length == 0) {
+            return null;
+        }
+        return headers[0];
+
     }
 
     @Override
     public void load() throws BodyParsingException {
-        if (method().hasBodySupport()) {
+        if (method.hasBodySupport()) {
+            MediaType mediaType = MediaType.parse(contentType());
             String rawBody = routingContext.getBodyAsString();
-            this.body = BodyReader.read(rawBody, false, MediaType.parse(routingContext.parsedHeaders().contentType().component()), charset);
+            this.body = BodyReader.read(rawBody, false, mediaType, charset);
         } else {
             this.body = new EmptyBody();
         }
@@ -90,17 +106,17 @@ public class VertxHttpRequest implements HttpRequest {
 
     @Override
     public HttpMethod method() {
-        return HttpMethod.valueOf(routingContext.request().method().name());
+        return this.method;
     }
 
     @Override
     public String userAgent() {
-        return routingContext.request().headers().get("User-Agent");
+        return this.userAgent;
     }
 
     @Override
     public String ipAddress() {
-        return routingContext.request().host();
+        return routingContext.request().connection().remoteAddress().hostAddress();
     }
 
     @Override
@@ -110,7 +126,7 @@ public class VertxHttpRequest implements HttpRequest {
 
     @Override
     public String contentType() {
-        return routingContext.request().headers().get(HttpHeaders.CONTENT_TYPE);
+        return this.contentType;
     }
 
     @Override
@@ -151,5 +167,21 @@ public class VertxHttpRequest implements HttpRequest {
     @Override
     public Xray xray() {
         return null;
+    }
+
+    @Override
+    public String toString() {
+        return "VertxHttpRequest{" +
+                "id='" + id + '\'' +
+                ", routingContext=" + routingContext +
+                ", headers=" + headers +
+                ", query=" + query +
+                ", pathParams=" + pathParams +
+                ", body=" + body +
+                ", userAgent='" + userAgent + '\'' +
+                ", contentType='" + contentType + '\'' +
+                ", method=" + method +
+                ", charset=" + charset +
+                '}';
     }
 }

@@ -8,6 +8,7 @@ import me.jamesj.http.library.server.body.exceptions.impl.UnknownContentTypeExce
 import me.jamesj.http.library.server.body.impl.FormDataBody;
 import me.jamesj.http.library.server.body.impl.JsonBody;
 import me.jamesj.http.library.server.body.impl.MultiPartFormDataBody;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

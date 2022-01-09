@@ -21,7 +21,7 @@ public class TestHttpRouteWithParameters implements HttpRoute<GenericResponse<St
     public static final String BODY = "Hello from /test-path-with-parameters";
 
     private static final Parameter<String> PARAMETER_NAME = Parameter.string()
-            .query("name")
+            .form("name")
             .build();
 
     private final Logger logger = LoggerFactory.getLogger(TestHttpRouteWithParameters.class);
@@ -48,6 +48,6 @@ public class TestHttpRouteWithParameters implements HttpRoute<GenericResponse<St
 
     @Override
     public CompletableFuture<GenericResponse<String>> handle(HttpRequest httpRequest) {
-        return CompletableFuture.completedFuture(GenericResponse.of(200, BODY));
+        return CompletableFuture.completedFuture(GenericResponse.of(200, BODY + " from " + httpRequest.get(PARAMETER_NAME)));
     }
 }

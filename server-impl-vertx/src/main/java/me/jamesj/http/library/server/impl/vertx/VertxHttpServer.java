@@ -32,7 +32,7 @@ public class VertxHttpServer implements HttpServer {
         this.logger = LoggerFactory.getLogger(getClass());
         this.router = Router.router(Vertx.vertx());
 
-        this.router.route().blockingHandler(routingContext -> {
+        this.router.route().handler(BodyHandler.create(false)).handler(routingContext -> {
             routingContext.put("start", System.currentTimeMillis());
             routingContext.next();
         });
@@ -82,13 +82,10 @@ public class VertxHttpServer implements HttpServer {
         io.vertx.core.http.HttpMethod method = toVertxHttpMethod(httpRoute.method());
         String path = httpRoute.path();
 
-        VertxHttpRoute<T> vertxHttpRoute = new VertxHttpRoute<>(this, httpRoute, Arrays.asList(filters));
-
         Route route = router.route(method, path);
 
-        if (httpRoute.method().hasBodySupport()) {
-            route.blockingHandler(BodyHandler.create(false));
-        }
+        VertxHttpRoute<T> vertxHttpRoute = new VertxHttpRoute<>(this, httpRoute, Arrays.asList(filters));
+
         route.blockingHandler(vertxHttpRoute);
 
         route.failureHandler(routingContext -> {
