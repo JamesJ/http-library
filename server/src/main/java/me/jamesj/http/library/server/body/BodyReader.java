@@ -22,11 +22,7 @@ public interface BodyReader {
 
     Body read(String body, Charset charset) throws BodyParsingException;
 
-    static Body read(String body, boolean isBase64, MediaType mediaType, Charset charset) throws BodyParsingException {
-        if (isBase64) {
-            body = new String(Base64.getDecoder().decode(body));
-        }
-
+    static Body read(String body, MediaType mediaType, Charset charset) throws BodyParsingException {
         BodyReader reader;
         if (mediaType.is(MediaType.JSON_UTF_8) || mediaType.is(MediaType.MANIFEST_JSON_UTF_8)) {
             reader = new JsonBody.JsonBodyReader();

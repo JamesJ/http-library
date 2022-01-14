@@ -10,15 +10,16 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.xray.Xray;
+import org.apache.commons.collections4.map.CaseInsensitiveMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class VertxHttpRequest implements HttpRequest {
 
@@ -42,9 +43,9 @@ public class VertxHttpRequest implements HttpRequest {
 
         this.id = id;
 
-        this.headers = new HashMap<>();
-        this.query = new HashMap<>();
-        this.pathParams = new HashMap<>(routingContext.pathParams());
+        this.headers = new CaseInsensitiveMap<>();
+        this.query = new CaseInsensitiveMap<>();
+        this.pathParams = new CaseInsensitiveMap<>(routingContext.pathParams());
 
         for (Map.Entry<String, String> header : routingContext.request().headers()) {
             this.headers.compute(header.getKey().toLowerCase(), (s, strings) -> {
@@ -88,7 +89,7 @@ public class VertxHttpRequest implements HttpRequest {
         if (method.hasBodySupport()) {
             MediaType mediaType = MediaType.parse(contentType());
             String rawBody = routingContext.getBodyAsString();
-            this.body = BodyReader.read(rawBody, false, mediaType, charset);
+            this.body = BodyReader.read(rawBody, mediaType, charset);
         } else {
             this.body = new EmptyBody();
         }
@@ -162,11 +163,6 @@ public class VertxHttpRequest implements HttpRequest {
     @Override
     public <K> K get(String key) {
         return routingContext.get(key);
-    }
-
-    @Override
-    public Xray xray() {
-        return null;
     }
 
     @Override

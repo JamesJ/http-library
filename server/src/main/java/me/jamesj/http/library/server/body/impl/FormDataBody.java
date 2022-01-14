@@ -2,41 +2,22 @@ package me.jamesj.http.library.server.body.impl;
 
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
-import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
-import me.jamesj.http.library.server.parameters.Source;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class FormDataBody implements Body {
-
-    private final Map<String, Object> map;
+public class FormDataBody extends AbstractRequestBody {
 
     public FormDataBody(Map<String, Object> map) {
-        this.map = map;
-    }
-
-    @Override
-    public Source.Result get(String key) {
-        Object result = this.map.get(key);
-        if (result == null) {
-            return null;
-        }
-        return Source.Result.of(result);
-    }
-
-    @Override
-    public int length() {
-        return 0;
+        super(map);
     }
 
     public static class FormDataReader implements BodyReader {
 
         @Override
-        public Body read(String body, Charset charset) throws BodyParsingException {
+        public Body read(String body, Charset charset) {
             String[] parts = body.split("&");
 
             Map<String, Object> map = new HashMap<>();
@@ -135,11 +116,6 @@ public class FormDataBody implements Body {
                 list.add(decode(value, charset));
             }
             return list;
-        }
-
-        private List<String> parseList(String value) {
-            String[] split = value.split(",");
-            return new ArrayList<>(Arrays.asList(split));
         }
 
         private String decode(String str, Charset charset) {

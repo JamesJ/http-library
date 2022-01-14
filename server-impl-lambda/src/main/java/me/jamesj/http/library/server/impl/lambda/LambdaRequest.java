@@ -11,14 +11,11 @@ import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.body.impl.EmptyBody;
 import me.jamesj.http.library.server.parameters.Parameter;
 import me.jamesj.http.library.server.routes.HttpRequest;
-import me.jamesj.http.library.server.xray.Segment;
-import me.jamesj.http.library.server.xray.Xray;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class LambdaRequest implements HttpRequest {
@@ -34,14 +31,10 @@ public class LambdaRequest implements HttpRequest {
     private final Map<String, String[]> headers, query;
     private final Map<String, String> pathParams;
 
-    private final Xray xray;
-
     private Body body;
 
     public LambdaRequest(HttpMethod httpMethod, APIGatewayV2HTTPEvent requestEvent, Context context) {
         this.map = new HashMap<>();
-
-        this.xray = new AwsXray();
 
         this.requestEvent = requestEvent;
         this.context = context;
@@ -96,16 +89,14 @@ public class LambdaRequest implements HttpRequest {
 
     @Override
     public void load() throws BodyParsingException {
-        Segment segment = xray.startSegment("Body Loading");
         if (method().hasBodySupport()) {
             if (contentType() == null) {
                 throw new BodyParsingException("No Content-Type provided!");
             }
-            this.body = BodyReader.read(requestEvent.getBody(), requestEvent.getIsBase64Encoded(), MediaType.parse(contentType), StandardCharsets.UTF_8);
+            this.body = BodyReader.read(requestEvent.getBody(), MediaType.parse(contentType), StandardCharsets.UTF_8);
         } else {
             this.body = new EmptyBody();
         }
-        segment.end();
     }
 
     @Override
@@ -161,11 +152,6 @@ public class LambdaRequest implements HttpRequest {
     @Override
     public <K> K get(String key) {
         return (K) this.map.get(key);
-    }
-
-    @Override
-    public Xray xray() {
-        return this.xray;
     }
 
     public Context getContext() {

@@ -44,7 +44,7 @@ public class Testing {
         }
 */
         try {
-            Body body = BodyReader.read("email=james%40craftyhr.com&first_name=James&last_name=Johnstone", false, MediaType.FORM_DATA, StandardCharsets.UTF_8);
+            Body body = BodyReader.read("email=james%40craftyhr.com&first_name=James&last_name=Johnstone", MediaType.FORM_DATA, StandardCharsets.UTF_8);
         } catch (BodyParsingException e) {
             e.printStackTrace();
         }

@@ -4,13 +4,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.*;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
-import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.parameters.Source;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +52,7 @@ public class JsonBody implements Body {
         public static Gson GSON = new GsonBuilder().create();
 
         @Override
-        public Body read(String body, Charset charset) throws BodyParsingException {
+        public Body read(String body, Charset charset) {
             JsonObject jsonObject = GSON.fromJson(body, JsonObject.class);
             return new JsonBody(jsonObject);
         }

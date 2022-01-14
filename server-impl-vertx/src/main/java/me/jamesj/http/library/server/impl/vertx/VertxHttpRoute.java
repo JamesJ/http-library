@@ -3,6 +3,7 @@ package me.jamesj.http.library.server.impl.vertx;
 import com.google.common.net.HttpHeaders;
 import io.vertx.core.Handler;
 import io.vertx.ext.web.RoutingContext;
+import me.jamesj.http.library.server.AbstractRoute;
 import me.jamesj.http.library.server.body.exceptions.BodyParsingException;
 import me.jamesj.http.library.server.body.exceptions.impl.ParsingException;
 import me.jamesj.http.library.server.parameters.Validator;
@@ -35,6 +36,10 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
         this.filters = filters;
     }
 
+    public VertxHttpRoute(VertxHttpServer server, AbstractRoute<T> route) {
+        this(server, route, route.filters());
+    }
+
     public HttpRequest buildHttpRequest(RoutingContext routingContext) {
         return new VertxHttpRequest(server.configuration().getRequestIdGenerator().get(), routingContext);
     }
@@ -46,16 +51,16 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
         try {
             httpRequest.load();
 
-            boolean broke = false;
             for (HttpFilter filter : filters) {
+                filter.getLogger().info("Invoking {}", filter);
                 try {
                     filter.filter(httpRequest).join();
                 } catch (Throwable throwable) {
                     completableFuture = CompletableFuture.failedFuture(throwable);
-                    broke = true;
+                    break;
                 }
             }
-            if (!broke) {
+            if (completableFuture == null) {
                 completableFuture = this.httpRoute.handle(httpRequest);
             }
         } catch (BodyParsingException e) {

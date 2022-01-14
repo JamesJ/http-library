@@ -16,7 +16,7 @@ import me.jamesj.http.library.server.routes.exceptions.impl.RouteNotFoundExcepti
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class VertxHttpServer implements HttpServer {
@@ -41,7 +41,7 @@ public class VertxHttpServer implements HttpServer {
                 .setPort(configuration.getPort()));
     }
 
-    class UnknownRoute {
+    static class UnknownRoute {
 
     }
 
@@ -78,13 +78,13 @@ public class VertxHttpServer implements HttpServer {
     }
 
     @Override
-    public <T extends HttpResponse> void register(HttpRoute<T> httpRoute, HttpFilter... filters) {
+    public <T extends HttpResponse> void register(HttpRoute<T> httpRoute, List<HttpFilter> filters) {
         io.vertx.core.http.HttpMethod method = toVertxHttpMethod(httpRoute.method());
         String path = httpRoute.path();
 
         Route route = router.route(method, path);
 
-        VertxHttpRoute<T> vertxHttpRoute = new VertxHttpRoute<>(this, httpRoute, Arrays.asList(filters));
+        VertxHttpRoute<T> vertxHttpRoute = new VertxHttpRoute<>(this, httpRoute, filters);
 
         route.blockingHandler(vertxHttpRoute);
 
@@ -94,7 +94,6 @@ public class VertxHttpServer implements HttpServer {
 
             VertxHttpRoute.handle(getLogger(), httpRequest, CompletableFuture.failedFuture(routingContext.failure()), routingContext);
         });
-
     }
 
     private io.vertx.core.http.HttpMethod toVertxHttpMethod(HttpMethod method) {

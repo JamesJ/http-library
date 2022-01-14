@@ -6,12 +6,13 @@ import me.jamesj.http.library.server.response.HttpResponse;
 import me.jamesj.http.library.server.routes.HttpFilter;
 import me.jamesj.http.library.server.routes.HttpRoute;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRoute<T> {
+public abstract class AbstractRoute<T extends HttpResponse> implements HttpRoute<T> {
 
     private final String path;
     private final HttpMethod method;
@@ -20,27 +21,32 @@ public abstract class AbstractRoute<T extends HttpResponse<?>> implements HttpRo
     private final List<Parameter<?>> parameters;
     private final List<HttpFilter> filters;
 
-    public AbstractRoute(@NotNull String path, @NotNull HttpMethod method) {
+    public AbstractRoute(@NotNull String path, @NotNull HttpMethod method, @Nullable Parameter<?>... parameters) {
+        this(path, method, Collections.emptyList(), parameters);
+    }
+
+    public AbstractRoute(@NotNull String path, @NotNull HttpMethod method, List<HttpFilter> filters, @Nullable Parameter<?>... parameters) {
         this.path = path;
         this.method = method;
         this.logger = LoggerFactory.getLogger(getClass());
 
-        this.parameters = new ArrayList<>();
-        this.filters = new ArrayList<>();
+        this.filters = new ArrayList<>(filters);
+
+        if (parameters == null) {
+            this.parameters = Collections.emptyList();
+        } else {
+            this.parameters = Arrays.asList(parameters);
+        }
+
+        if (parameters != null && parameters.length > 0) {
+            this.filters.add(new Validator.ValidatorFilter(parameters));
+        }
     }
 
     protected void filters(@NotNull HttpFilter... filters) {
         List<HttpFilter> httpFilters = new ArrayList<>(Arrays.asList(filters));
 
         this.filters.addAll(httpFilters);
-    }
-
-    protected void validate() {
-        filters(new Validator.ValidatorFilter(parameters.toArray(Parameter[]::new)));
-    }
-
-    protected void parameter(@NotNull Parameter<?>... parameter) {
-        this.parameters.addAll(Arrays.asList(parameter));
     }
 
     public List<HttpFilter> filters() {
