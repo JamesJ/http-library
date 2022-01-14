@@ -95,6 +95,10 @@ public class VertxHttpRequest implements HttpRequest {
         }
     }
 
+    public RoutingContext getRoutingContext() {
+        return routingContext;
+    }
+
     @Override
     public @NotNull Body body() {
         return this.body;

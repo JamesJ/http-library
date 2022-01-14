@@ -52,7 +52,6 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
             httpRequest.load();
 
             for (HttpFilter filter : filters) {
-                filter.getLogger().info("Invoking {}", filter);
                 try {
                     filter.filter(httpRequest).join();
                 } catch (Throwable throwable) {
