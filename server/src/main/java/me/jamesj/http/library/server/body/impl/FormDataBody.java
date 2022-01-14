@@ -18,6 +18,9 @@ public class FormDataBody extends AbstractRequestBody {
 
         @Override
         public Body read(String body, Charset charset) {
+            if (body == null) {
+                return new EmptyBody();
+            }
             String[] parts = body.split("&");
 
             Map<String, Object> map = new HashMap<>();

@@ -53,6 +53,9 @@ public class JsonBody implements Body {
 
         @Override
         public Body read(String body, Charset charset) {
+            if (body == null) {
+                return new EmptyBody();
+            }
             JsonObject jsonObject = GSON.fromJson(body, JsonObject.class);
             return new JsonBody(jsonObject);
         }

@@ -26,8 +26,7 @@ public class TestHttpServer {
 
     private static final Logger logger = LoggerFactory.getLogger(TestHttpServer.class);
 
-    @BeforeAll
-    static void setup() {
+    public TestHttpServer() {
         HttpConfiguration httpConfiguration = new HttpConfiguration()
                 .port(8089);
         VertxHttpServer httpServer = new VertxHttpServer(httpConfiguration);
@@ -38,7 +37,6 @@ public class TestHttpServer {
 
         logger.info("Server started");
     }
-
 
 
     @Test

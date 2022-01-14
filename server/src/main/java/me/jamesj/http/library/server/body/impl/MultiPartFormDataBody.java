@@ -52,6 +52,9 @@ public class MultiPartFormDataBody implements Body {
 
         @Override
         public Body read(String body, Charset charset) throws BodyParsingException {
+            if (body == null) {
+                return new EmptyBody();
+            }
             Map<String, FormContext> map = new HashMap<>();
 
             MultipartStream multipartStream = new MultipartStream(new ByteArrayInputStream(body.getBytes(charset)), this.boundary.getBytes(charset));
