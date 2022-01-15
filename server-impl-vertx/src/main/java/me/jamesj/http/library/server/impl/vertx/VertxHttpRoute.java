@@ -82,7 +82,7 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
                     httpResponse = (HttpException) throwable;
                 } else {
                     InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
-                    logger.error("Caught exception (ID: " + internalHttpServerException.getId() + ") in request " + httpRequest.requestId(), throwable);
+                    logger.error("Caught exception (ID: {}) in request {}", internalHttpServerException.getId(), httpRequest.requestId(), throwable);
                     httpResponse = internalHttpServerException;
                 }
             } else {
