@@ -21,7 +21,7 @@ public interface Parser<T> {
         return (parameter, str) -> str;
     }
 
-    static <E extends Enum<E>> StringParser<Enum<E>> asEnum(Class<E> clazz) {
+    static <E extends Enum<E>> StringParser<E> asEnum(Class<E> clazz) {
         return (parameter, str) -> {
             if (str == null) {
                 throw new ParsingException(parameter, Validator.Failure.of("No value provided"));
