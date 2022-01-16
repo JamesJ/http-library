@@ -2,6 +2,7 @@ package me.jamesj.http.library.server.impl.vertx;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.net.JksOptions;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.BodyHandler;
@@ -37,8 +38,13 @@ public class VertxHttpServer implements HttpServer {
             routingContext.next();
         });
 
-        this.httpServer = Vertx.vertx().createHttpServer(new HttpServerOptions()
-                .setPort(configuration.getPort()));
+        HttpServerOptions options = new HttpServerOptions().setPort(configuration.getPort());
+        if (configuration.secure() != null) {
+            HttpConfiguration.SecureConfiguration secureConfiguration = configuration.getSecureConfiguration();
+            options.setSsl(true)
+                    .setKeyStoreOptions(new JksOptions().setPath(secureConfiguration.getPath()).setPassword(secureConfiguration.getPassword()));
+        }
+        this.httpServer = Vertx.vertx().createHttpServer(options);
     }
 
     static class UnknownRoute {

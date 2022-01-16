@@ -10,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public interface Parser<T> {
@@ -17,6 +19,23 @@ public interface Parser<T> {
     @NotNull
     static StringParser<String> asString() {
         return (parameter, str) -> str;
+    }
+
+    static <E extends Enum<E>> StringParser<Enum<E>> asEnum(Class<E> clazz) {
+        return (parameter, str) -> {
+            if (str == null) {
+                throw new ParsingException(parameter, Validator.Failure.of("No value provided"));
+            }
+            try {
+                return Enum.valueOf(clazz, str.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                List<String> options = new ArrayList<>();
+                for (E enumConstant : clazz.getEnumConstants()) {
+                    options.add("\"" + enumConstant.name().toLowerCase() + "\"");
+                }
+                throw new ParsingException(parameter, Validator.Failure.of("Value \"" + str + "\" is not valid, supported values: [" + String.join(",", options) + "]"));
+            }
+        };
     }
 
     @NotNull
@@ -87,7 +106,7 @@ public interface Parser<T> {
         };
     }
 
-    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) ;
+    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata);
 
     interface NumberParser<T extends Number> extends StringParser<T> {
 
@@ -117,6 +136,7 @@ public interface Parser<T> {
             throw new ParsingException(parameter, Validator.Failure.of("Value is not a valid number"));
         }
     }
+
     interface StringParser<T> extends Parser<T> {
 
         @Nullable
