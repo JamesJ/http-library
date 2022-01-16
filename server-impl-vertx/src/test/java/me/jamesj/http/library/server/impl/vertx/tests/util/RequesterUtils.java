@@ -33,6 +33,7 @@ public class RequesterUtils {
         }
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
                 .uri(URI.create("http://localhost:8089" + uri + queryString));
 
         headers.forEach(builder::header);

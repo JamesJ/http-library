@@ -1,5 +1,6 @@
 package me.jamesj.http.library.server.impl.vertx;
 
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.net.JksOptions;
@@ -39,11 +40,6 @@ public class VertxHttpServer implements HttpServer {
         });
 
         HttpServerOptions options = new HttpServerOptions().setPort(configuration.getPort());
-        if (configuration.secure() != null) {
-            HttpConfiguration.SecureConfiguration secureConfiguration = configuration.getSecureConfiguration();
-            options.setSsl(true)
-                    .setKeyStoreOptions(new JksOptions().setPath(secureConfiguration.getPath()).setPassword(secureConfiguration.getPassword()));
-        }
         this.httpServer = Vertx.vertx().createHttpServer(options);
     }
 
@@ -63,14 +59,13 @@ public class VertxHttpServer implements HttpServer {
         });
 
 
-        httpServer.requestHandler(router)
-                .listen(httpServerAsyncResult -> {
-                    if (httpServerAsyncResult.failed()) {
-                        getLogger().info("Failed to start http server on port {}", configuration.getPort(), httpServerAsyncResult.cause());
-                    } else {
-                        getLogger().info("Started http server on port {}", httpServerAsyncResult.result().actualPort());
-                    }
-                });
+        Future<io.vertx.core.http.HttpServer> future = httpServer.requestHandler(router).listen();
+
+        if (future.failed()) {
+            getLogger().info("Failed to start http server on port {}", configuration.getPort(), future.cause());
+        } else {
+            getLogger().info("Started http server on port {}", httpServer.actualPort());
+        }
     }
 
     @Override

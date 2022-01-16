@@ -28,6 +28,9 @@ public interface Parameter<T> {
     static Builder<Map<String, String>> map() {
         return new Builder<>(Parser.asMap());
     }
+    static <E extends Enum<E>> Builder<Enum<E>> asEnum(Class<E> clazz) {
+        return new Builder<>(Parser.asEnum(clazz));
+    }
 
     List<Validator<T>> validators();
 

@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class TestHttpServer {
 
     private static final Logger logger = LoggerFactory.getLogger(TestHttpServer.class);
-
+    
     public TestHttpServer() {
         HttpConfiguration httpConfiguration = new HttpConfiguration()
                 .port(8089);
