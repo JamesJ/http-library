@@ -230,7 +230,7 @@ public interface Validator<T> {
                 }
                 if (obj == null && parameter.required()) {
                     failures.add(Failure.of("Value not provided"));
-                } else {
+                } else if (obj != null) {
                     if (validators != null) {
                         for (Validator validator : validators) {
                             Failure failure = validator.test(obj);

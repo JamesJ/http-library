@@ -65,7 +65,7 @@ public class VertxHttpRequest implements HttpRequest {
                     strings = new String[0];
                 }
                 List<String> list = new ArrayList<>(Arrays.asList(strings));
-                list.add(s);
+                list.add(query.getValue());
 
                 return list.toArray(String[]::new);
             });

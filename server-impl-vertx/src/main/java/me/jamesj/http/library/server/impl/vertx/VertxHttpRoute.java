@@ -80,9 +80,12 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
                 }
                 if (throwable instanceof HttpException) {
                     httpResponse = (HttpException) throwable;
+                } else if (throwable instanceof ParsingException) {
+                    ParsingException e = (ParsingException) throwable;
+                    httpResponse = new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()}));
                 } else {
                     InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
-                    logger.error("Caught exception (ID: {}) in request {}", internalHttpServerException.getId(), httpRequest.requestId(), throwable);
+                    logger.error("Caught exception (ID: " + internalHttpServerException.getId() + ") in request " + httpRequest.requestId(), throwable);
                     httpResponse = internalHttpServerException;
                 }
             } else {
@@ -90,7 +93,16 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
             }
             context.response().putHeader(HttpHeaders.CONTENT_TYPE, httpResponse.getMediaType().toString());
             context.response().setStatusCode(httpResponse.getStatusCode());
-            context.response().end(httpResponse.build(httpRequest).toString());
+            Object response;
+            try {
+                response = httpResponse.build(httpRequest);
+            } catch (Exception e) {
+                InternalHttpServerException cast = new InternalHttpServerException(e);
+                response = cast.build(httpRequest);
+                logger.error("Caught exception (ID: " + cast.getId() + ") when building response request " + httpRequest.requestId(), throwable);
+            }
+
+            context.response().end(response.toString());
         }).whenComplete((t, throwable) -> {
             long time = System.currentTimeMillis() - (long) context.get("start");
             logger.info("Handled request ({}) from {} in {}ms (status: {}, written: {})",

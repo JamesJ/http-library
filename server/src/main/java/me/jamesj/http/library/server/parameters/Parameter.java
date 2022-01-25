@@ -5,29 +5,36 @@ import me.jamesj.http.library.server.parameters.files.File;
 import me.jamesj.http.library.server.parameters.parser.Parser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface Parameter<T> {
 
     static Builder<String> string() {
         return new Builder<>(Parser.asString());
     }
+
     static Builder<Integer> integer() {
         return new Builder<>(Parser.asInteger());
     }
+
+    static Builder<Long> asLong() {
+        return new Builder<>(Parser.asLong());
+    }
+
     static Builder<Boolean> bool() {
         return new Builder<>(Parser.asBoolean());
     }
+
     static Builder<File> file() {
         return new Builder<>(Parser.asFile());
     }
+
     static Builder<Map<String, String>> map() {
         return new Builder<>(Parser.asMap());
     }
+
     static <E extends Enum<E>> Builder<E> asEnum(Class<E> clazz) {
         return new Builder<>(Parser.asEnum(clazz));
     }

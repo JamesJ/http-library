@@ -8,6 +8,7 @@ import me.jamesj.http.library.server.parameters.files.File;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -45,7 +46,12 @@ public interface Parser<T> {
 
     @NotNull
     static NumberParser<Integer> asInteger() {
-        return (parameter, number) -> number.intValue();
+        return (parameter, number) -> {
+            // this shouldnt happen?
+            if (number == null) return null;
+
+            return number.intValue();
+        };
     }
 
     @NotNull
@@ -115,7 +121,12 @@ public interface Parser<T> {
 
         @Override
         default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull String str) throws ParsingException {
-            return parse(parameter, NumberUtils.createNumber(str));
+            LoggerFactory.getLogger(Parser.NumberParser.class).info("Parsing string as number {}", str);
+            Number number = NumberUtils.createNumber(str);
+            if (number == null) {
+                return null;
+            }
+            return parse(parameter, number);
         }
 
         @Override
@@ -152,6 +163,7 @@ public interface Parser<T> {
             } else {
                 string = data.toString();
             }
+
             return parse(parameter, string);
         }
     }
