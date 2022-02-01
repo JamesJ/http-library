@@ -39,6 +39,7 @@ public class TestHttpServer {
         httpServer.register(new TestHttpRoute());
         httpServer.register(new TestHttpRouteWithParameters());
         httpServer.register(new TestHttpRouteWithParameterList());
+        httpServer.register(new TestHttpRouteWithParameterListOfNumbers());
         httpServer.start();
 
         logger.info("Server started");
@@ -81,10 +82,25 @@ public class TestHttpServer {
 
 
     @Test
-    @Order(4)
+    @Order(5)
     public void testHasParamList() throws IOException, InterruptedException {
         String body = URLEncoder.encode("list[]=element one&list[]=element two&list=[]=element three", StandardCharsets.UTF_8);
         HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list", Map.of("Content-Type", "application/x-www-form-urlencoded"), new HashMap<>(), body);
+        assertEquals(200, httpResponse.statusCode());
+    }
+    @Test
+    @Order(6)
+    public void testWhenShouldHaveParamListOfNumbers() throws IOException, InterruptedException {
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list-of-doubles", new HashMap<>(), new HashMap<>(), null);
+        assertEquals(400, httpResponse.statusCode());
+    }
+
+
+    @Test
+    @Order(7)
+    public void testHasParamListOfNumbers() throws IOException, InterruptedException {
+        String body = URLEncoder.encode("list[]=123&list[]=123.23&list=[]=-123", StandardCharsets.UTF_8);
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list-of-doubles", Map.of("Content-Type", "application/x-www-form-urlencoded"), new HashMap<>(), body);
         assertEquals(200, httpResponse.statusCode());
     }
 
