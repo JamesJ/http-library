@@ -12,15 +12,27 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public interface Parser<T> {
 
+    static <Type> ListParser<Type> asList(Parser<Type> parser) {
+        return (parameter, element, item) -> {
+            try {
+                return parser.parse(parameter, item, new HashMap<>());
+            } catch (ParsingException e) {
+                throw new ParsingException(e.getParameter(), Validator.Failure.of("[" + element + "] " + e.getFailure().getMessage()));
+            }
+        };
+    }
+
     @NotNull
     static StringParser<String> asString() {
         return (parameter, str) -> str;
     }
+
 
     static <E extends Enum<E>> StringParser<E> asEnum(Class<E> clazz) {
         return (parameter, str) -> {
@@ -112,15 +124,15 @@ public interface Parser<T> {
         };
     }
 
-    @Nullable T parse(Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata);
+    @Nullable T parse(Parameter parameter, @NotNull Object data, Map<String, String> metadata);
 
     interface NumberParser<T extends Number> extends StringParser<T> {
 
         @Nullable
-        T parse(Parameter<T> parameter, @NotNull Number number) throws ParsingException;
+        T parse(Parameter parameter, @NotNull Number number) throws ParsingException;
 
         @Override
-        default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull String str) throws ParsingException {
+        default @Nullable T parse(@NotNull Parameter parameter, @NotNull String str) throws ParsingException {
             LoggerFactory.getLogger(Parser.NumberParser.class).info("Parsing string as number {}", str);
             Number number = NumberUtils.createNumber(str);
             if (number == null) {
@@ -130,7 +142,7 @@ public interface Parser<T> {
         }
 
         @Override
-        default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) {
+        default @Nullable T parse(Parameter parameter, @NotNull Object data, Map<String, String> metadata) {
             String string;
             if (data instanceof String) {
                 string = (String) data;
@@ -151,10 +163,10 @@ public interface Parser<T> {
     interface StringParser<T> extends Parser<T> {
 
         @Nullable
-        T parse(@NotNull Parameter<T> parameter, @NotNull String str) throws ParsingException;
+        T parse(@NotNull Parameter parameter, @NotNull String str) throws ParsingException;
 
         @Override
-        default @Nullable T parse(@NotNull Parameter<T> parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException {
+        default @Nullable T parse(Parameter parameter, @NotNull Object data, Map<String, String> metadata) throws ParsingException {
             String string;
             if (data instanceof String) {
                 string = (String) data;
@@ -168,5 +180,25 @@ public interface Parser<T> {
         }
     }
 
+    interface ListParser<T> extends Parser<List<T>> {
 
+        T parse(Parameter parameter, int element, Object item) throws ParsingException;
+
+        @Override
+        default @Nullable List<T> parse(Parameter parameter, @NotNull Object data, Map<String, String> metadata) {
+            if (!(data instanceof List)) {
+                throw new ParsingException(parameter, Validator.Failure.of("Value is not a list"));
+            }
+            List list = (List) data;
+
+            List<T> parsed = new ArrayList<>();
+            for (int i = 0; i < list.size(); i++) {
+                Object o = list.get(i);
+
+                parsed.add(parse(parameter, i, o));
+            }
+
+            return parsed;
+        }
+    }
 }

@@ -13,8 +13,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,6 +38,7 @@ public class TestHttpServer {
 
         httpServer.register(new TestHttpRoute());
         httpServer.register(new TestHttpRouteWithParameters());
+        httpServer.register(new TestHttpRouteWithParameterList());
         httpServer.start();
 
         logger.info("Server started");
@@ -63,6 +69,22 @@ public class TestHttpServer {
     @Order(3)
     public void testWhenShouldHaveParams() throws IOException, InterruptedException {
         HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameters", new HashMap<>(), new HashMap<>(), null);
+        assertEquals(400, httpResponse.statusCode());
+    }
+
+    @Test
+    @Order(4)
+    public void testWhenShouldHaveParamList() throws IOException, InterruptedException {
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list", new HashMap<>(), new HashMap<>(), null);
+        assertEquals(400, httpResponse.statusCode());
+    }
+
+
+    @Test
+    @Order(4)
+    public void testHasParamList() throws IOException, InterruptedException {
+        String body = URLEncoder.encode("list[]=element one&list[]=element two&list=[]=element three", StandardCharsets.UTF_8);
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list", new HashMap<>(), new HashMap<>(), body);
         assertEquals(400, httpResponse.statusCode());
     }
 

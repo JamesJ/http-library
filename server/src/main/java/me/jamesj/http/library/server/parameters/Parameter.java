@@ -11,6 +11,10 @@ import java.util.*;
 
 public interface Parameter<T> {
 
+    static <T> Builder<List<T>> list(Parser<T> parser) {
+        return new Builder<>(Parser.asList(parser));
+    }
+
     static Builder<String> string() {
         return new Builder<>(Parser.asString());
     }
