@@ -84,8 +84,9 @@ public class TestHttpServer {
     @Order(4)
     public void testHasParamList() throws IOException, InterruptedException {
         String body = URLEncoder.encode("list[]=element one&list[]=element two&list=[]=element three", StandardCharsets.UTF_8);
-        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list", new HashMap<>(), new HashMap<>(), body);
-        assertEquals(400, httpResponse.statusCode());
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list", Map.of("Content-Type", "application/x-www-form-urlencoded"), new HashMap<>(), body);
+        logger.info("httpResponse={}", httpResponse.body());
+        assertEquals(200, httpResponse.statusCode());
     }
 
 
