@@ -133,7 +133,6 @@ public interface Parser<T> {
 
         @Override
         default @Nullable T parse(@NotNull Parameter parameter, @NotNull String str) throws ParsingException {
-            LoggerFactory.getLogger(Parser.NumberParser.class).info("Parsing string as number {}", str);
             Number number = NumberUtils.createNumber(str);
             if (number == null) {
                 return null;

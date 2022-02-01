@@ -2,8 +2,8 @@ package me.jamesj.http.library.server.body.impl;
 
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -40,7 +40,42 @@ public class FormDataBody extends AbstractRequestBody {
 
                 String key, value;
 
-                if (part.contains("[]=")) {
+
+                if (part.contains("][")) {
+                    // array map parsing
+                    int firstBracket = part.indexOf("[");
+                    int secondBracket = part.indexOf("]");
+                    String secondPart = part.substring(secondBracket + 1);
+                    int thirdBracket = secondPart.indexOf("[");
+                    int fourthBracket = secondPart.indexOf("]");
+
+                    String paramName = part.substring(0, firstBracket);
+                    String elementStr = part.substring(firstBracket + 1, secondBracket);
+
+                    int element = Integer.parseInt(elementStr);
+
+                    key = secondPart.substring(thirdBracket + 1, fourthBracket);
+                    value = secondPart.substring(secondPart.indexOf("=") + 1);
+
+                    ArrayList<Map<String, String>> list;
+                    if (map.containsKey(paramName)) {
+                        Object obj = map.get(paramName);
+                        if (obj instanceof List) {
+                            list = (ArrayList<Map<String, String>>) map.get(paramName);
+                        } else {
+                            throw new IllegalStateException("Incompatible mix match of types (is " + (obj.getClass()) + ")");
+                        }
+                    } else {
+                        list = new ArrayList<>();
+                    }
+
+                    Map<String, String> elemMap = list.size() >= element ? new HashMap<>() : list.get(element);
+                    elemMap.put(key, value);
+
+                    list.add(element, elemMap);
+
+                    map.put(paramName, list);
+                } else if (part.contains("[]=")) {
                     // array parsing
 
                     key = part.substring(0, part.indexOf("["));

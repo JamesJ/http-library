@@ -84,6 +84,7 @@ public class VertxHttpRoute<T extends HttpResponse> implements Handler<RoutingCo
                     ParsingException e = (ParsingException) throwable;
                     httpResponse = new BadRequestException(Map.of(e.getParameter(), new Validator.Failure[]{e.getFailure()}));
                 } else {
+                    throwable.printStackTrace();
                     InternalHttpServerException internalHttpServerException = new InternalHttpServerException(throwable);
                     logger.error("Caught exception (ID: " + internalHttpServerException.getId() + ") in request " + httpRequest.requestId(), throwable);
                     httpResponse = internalHttpServerException;

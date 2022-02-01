@@ -40,6 +40,7 @@ public class TestHttpServer {
         httpServer.register(new TestHttpRouteWithParameters());
         httpServer.register(new TestHttpRouteWithParameterList());
         httpServer.register(new TestHttpRouteWithParameterListOfNumbers());
+        httpServer.register(new TestHttpRouteWithParameterListOfMaps());
         httpServer.start();
 
         logger.info("Server started");
@@ -101,6 +102,21 @@ public class TestHttpServer {
     public void testHasParamListOfNumbers() throws IOException, InterruptedException {
         String body = URLEncoder.encode("list[]=123&list[]=123.23&list=[]=-123", StandardCharsets.UTF_8);
         HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list-of-doubles", Map.of("Content-Type", "application/x-www-form-urlencoded"), new HashMap<>(), body);
+        assertEquals(200, httpResponse.statusCode());
+    }
+    @Test
+    @Order(8)
+    public void testWhenShouldHaveParamListOfMaps() throws IOException, InterruptedException {
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list-of-maps", new HashMap<>(), new HashMap<>(), null);
+        assertEquals(400, httpResponse.statusCode());
+    }
+
+
+    @Test
+    @Order(9)
+    public void testHasParamListOfMaps() throws IOException, InterruptedException {
+        String body = URLEncoder.encode("list[0][key]=value1&list[0][key1]=value2&list[1][key1]=value1&list[1][key2]=value2", StandardCharsets.UTF_8);
+        HttpResponse<String> httpResponse = RequesterUtils.request(HttpMethod.POST, "/test-path-with-parameter-list-of-maps", Map.of("Content-Type", "application/x-www-form-urlencoded"), new HashMap<>(), body);
         assertEquals(200, httpResponse.statusCode());
     }
 
