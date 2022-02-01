@@ -29,7 +29,9 @@ public interface BodyReader {
             reader = new JsonBody.JsonBodyReader();
         } else if (mediaType.is(MediaType.FORM_DATA)) {
             reader = new FormDataBody.FormDataReader();
-            body = URLDecoder.decode(body, charset);
+            if (body != null) {
+                body = URLDecoder.decode(body, charset);
+            }
         } else if (mediaType.is(BodyReader.MULTIPART_FORM_DATA) || mediaType.is(MULTIPART_MIXED)) {
             ImmutableList<String> param = mediaType.parameters().get("boundary");
             if (param == null || param.isEmpty()) {
