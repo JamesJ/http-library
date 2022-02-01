@@ -19,7 +19,6 @@ public class FormDataBody extends AbstractRequestBody {
 
         @Override
         public Body read(String body, Charset charset) {
-            LoggerFactory.getLogger(FormDataReader.class).info("body={}", body);
             if (body == null) {
                 return new EmptyBody();
             }
