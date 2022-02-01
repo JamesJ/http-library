@@ -3,6 +3,7 @@ package me.jamesj.http.library.server.body.impl;
 import me.jamesj.http.library.server.body.Body;
 import me.jamesj.http.library.server.body.BodyReader;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -18,9 +19,11 @@ public class FormDataBody extends AbstractRequestBody {
 
         @Override
         public Body read(String body, Charset charset) {
+            LoggerFactory.getLogger(FormDataReader.class).info("body={}", body);
             if (body == null) {
                 return new EmptyBody();
             }
+
             String[] parts = body.split("&");
 
             Map<String, Object> map = new HashMap<>();

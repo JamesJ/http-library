@@ -10,6 +10,7 @@ import me.jamesj.http.library.server.body.impl.JsonBody;
 import me.jamesj.http.library.server.body.impl.MultiPartFormDataBody;
 import org.slf4j.LoggerFactory;
 
+import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -28,6 +29,7 @@ public interface BodyReader {
             reader = new JsonBody.JsonBodyReader();
         } else if (mediaType.is(MediaType.FORM_DATA)) {
             reader = new FormDataBody.FormDataReader();
+            body = URLDecoder.decode(body, charset);
         } else if (mediaType.is(BodyReader.MULTIPART_FORM_DATA) || mediaType.is(MULTIPART_MIXED)) {
             ImmutableList<String> param = mediaType.parameters().get("boundary");
             if (param == null || param.isEmpty()) {
